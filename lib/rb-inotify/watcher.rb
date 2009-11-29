@@ -14,6 +14,11 @@ module INotify
     # @return [Notifier]
     attr_reader :notifier
 
+    # The path that this Watcher is watching.
+    #
+    # @return [String]
+    attr_reader :path
+
     # The {INotify::Notifier#watch flags}
     # specifying the events that this Watcher is watching for,
     # and potentially some options as well.
@@ -48,6 +53,7 @@ module INotify
     def initialize(notifier, path, *flags, &callback)
       @notifier = notifier
       @callback = callback || proc {}
+      @path = path
       @flags = flags.freeze
       @id = Native.inotify_add_watch(@notifier.fd, path,
         Native::Flags.to_mask(flags))
