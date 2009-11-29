@@ -10,6 +10,7 @@ begin
     gem.email = "nex342@gmail.com"
     gem.homepage = "http://github.com/nex3/rb-notify"
     gem.authors = ["Nathan Weizenbaum"]
+    gem.add_dependency "ffi", ">= 0.5.0"
     gem.add_development_dependency "yard"
   end
   Jeweler::GemcutterTasks.new
