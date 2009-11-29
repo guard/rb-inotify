@@ -140,6 +140,9 @@ module INotify
     # @yieldparam event [Event] The Event object containing information
     #   about the event that occured
     # @return [Watcher] A Watcher set up to watch this path for these events
+    # @raise [SystemCallError] if the file or directory can't be watched,
+    #   e.g. if the file isn't found, read access is denied,
+    #   or the flags don't contain any events
     def watch(path, *flags, &callback)
       Watcher.new(self, path, *flags, &callback)
     end
