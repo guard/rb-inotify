@@ -10,8 +10,13 @@ module INotify
       @@watchers[wd]
     end
 
-    def initialize(notifier, path, *flags)
+    def callback!(event)
+      @callback[event]
+    end
+
+    def initialize(notifier, path, *flags, &callback)
       @notifier = notifier
+      @callback = callback || proc {}
       @wd = Native.inotify_add_watch(@notifier.fd, path,
         Native::Flags.to_mask(flags))
 

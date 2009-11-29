@@ -19,8 +19,16 @@ module INotify
 
     attr_reader :fd
 
-    def watch(path, *flags)
-      Watcher.new(self, path, *flags)
+    def watch(path, *flags, &callback)
+      Watcher.new(self, path, *flags, &callback)
+    end
+
+    def run
+      loop {process}
+    end
+
+    def process
+      read_events.each {|event| event.callback!}
     end
 
     def read_events

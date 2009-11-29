@@ -17,6 +17,10 @@ module INotify
       @name = data[@native.size, @native[:len]]
     end
 
+    def callback!
+      watcher.callback!(self)
+    end
+
     def size
       @native.size + @native[:len]
     end
