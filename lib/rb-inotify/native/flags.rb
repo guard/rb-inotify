@@ -70,7 +70,7 @@ module INotify
         constants.select do |c|
           next false unless c =~ /^IN_/
           const_get(c) & mask != 0
-        end.map {|c| c.sub("IN_", "").downcase.to_sym}
+        end.map {|c| c.sub("IN_", "").downcase.to_sym} - [:all_events]
       end
     end
   end
