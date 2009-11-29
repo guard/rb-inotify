@@ -1,5 +1,3 @@
-require 'thread'
-
 module INotify
   class Watcher
     @@watchers = {}
