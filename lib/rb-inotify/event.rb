@@ -84,6 +84,8 @@ module INotify
       @name = data[@native.size, @native[:len]].gsub(/\0+$/, '')
       @notifier = notifier
       @watcher_id = @native[:wd]
+
+      raise Exception.new("inotify event queue has overflowed.") if @native[:mask] & Native::Flags::IN_Q_OVERFLOW != 0
     end
 
     # Calls the callback of the watcher that fired this event,
