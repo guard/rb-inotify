@@ -1,7 +1,10 @@
-class INotify
+module INotify
   class Watch
-    def initialize(path, *flags)
-      @wd = Native.inotify_add_watch(INotify.instance.fd, path,
+    attr_reader :notifier
+
+    def initialize(notifier, path, *flags)
+      @notifier = notifier
+      @wd = Native.inotify_add_watch(@notifier.fd, path,
         flags.map {|flag| INotify::Native::Flags.const_get("IN_#{flag.to_s.upcase}")}.
         inject(0) {|mask, flag| mask | flag})
       return unless @wd < 0
@@ -21,7 +24,7 @@ class INotify
     end
 
     def close
-      Native.inotify_rm_watch(INotify.instance.fd, @wd)
+      Native.inotify_rm_watch(@notifier.fd, @wd)
     end
   end
 end

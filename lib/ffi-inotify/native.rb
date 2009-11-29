@@ -2,7 +2,7 @@ require 'ffi'
 
 require 'ffi-inotify/native/flags'
 
-class INotify
+module INotify
   module Native
     extend FFI::Library
 

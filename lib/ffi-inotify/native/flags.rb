@@ -1,4 +1,4 @@
-class INotify
+module INotify
   module Native
     module Flags
       # File was accessed.
