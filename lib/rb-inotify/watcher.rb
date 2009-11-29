@@ -1,13 +1,50 @@
 module INotify
+  # Watchers monitor a single path for changes,
+  # specified by {INotify::Notifier#watch event flags}.
+  # A watcher is usually created via \{Notifier#watch}.
+  #
+  # One {Notifier} may have many {Watcher}s.
+  # The Notifier actually takes care of the checking for events,
+  # via \{Notifier#run #run} or \{Notifier#process #process}.
+  # The main purpose of having Watcher objects
+  # is to be able to disable them using \{#close}.
   class Watcher
+    # The {Notifier} that this Watcher belongs to.
+    #
+    # @return [Notifier]
     attr_reader :notifier
+
+    # The {INotify::Notifier#watch flags}
+    # specifying the events that this Watcher is watching for,
+    # and potentially some options as well.
+    #
+    # @return [Array<Symbol>]
     attr_reader :flags
+
+    # The id for this Watcher.
+    # Used to retrieve this Watcher from {Notifier#watchers}.
+    #
+    # @private
+    # @return [Fixnum]
     attr_reader :id
 
+    # Calls this Watcher's callback with the given {Event}.
+    #
+    # @private
+    # @param event [Event]
     def callback!(event)
       @callback[event]
     end
 
+    # Disables this Watcher, so that it doesn't fire any more events.
+    def close
+      Native.inotify_rm_watch(@notifier.fd, @id)
+    end
+
+    # Creates a new {Watcher}.
+    #
+    # @private
+    # @see Notifier#watch
     def initialize(notifier, path, *flags, &callback)
       @notifier = notifier
       @callback = callback || proc {}
@@ -32,10 +69,6 @@ module INotify
         else; ""
         end,
         FFI.errno)
-    end
-
-    def close
-      Native.inotify_rm_watch(@notifier.fd, @id)
     end
   end
 end
