@@ -1,6 +1,7 @@
 module INotify
   class Event
     attr_reader :cookie
+    attr_reader :watcher_id
     attr_reader :name
 
     def self.consume(data)
@@ -15,6 +16,7 @@ module INotify
       @native = Native::Event.new(ptr)
       @cookie = @native[:cookie]
       @name = data[@native.size, @native[:len]].gsub(/\0+$/, '')
+      @watcher_id = @native[:wd]
     end
 
     def callback!
@@ -26,7 +28,7 @@ module INotify
     end
 
     def watcher
-      @watcher ||= Watcher.from_wd(@native[:wd])
+      @watcher ||= Watcher.from_wd(@watcher_id)
     end
 
     def flags

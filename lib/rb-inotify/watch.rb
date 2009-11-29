@@ -5,9 +5,10 @@ module INotify
     @@watchers = {}
 
     attr_reader :notifier
+    attr_reader :id
 
-    def self.from_wd(wd)
-      @@watchers[wd]
+    def self.from_id(id)
+      @@watchers[id]
     end
 
     def callback!(event)
@@ -17,11 +18,11 @@ module INotify
     def initialize(notifier, path, *flags, &callback)
       @notifier = notifier
       @callback = callback || proc {}
-      @wd = Native.inotify_add_watch(@notifier.fd, path,
+      @id = Native.inotify_add_watch(@notifier.fd, path,
         Native::Flags.to_mask(flags))
 
-      unless @wd < 0
-        @@watchers[@wd] = self
+      unless @id < 0
+        @@watchers[@id] = self
         return
       end
 
@@ -40,7 +41,7 @@ module INotify
     end
 
     def close
-      Native.inotify_rm_watch(@notifier.fd, @wd)
+      Native.inotify_rm_watch(@notifier.fd, @id)
     end
   end
 end
