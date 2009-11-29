@@ -186,7 +186,7 @@ module INotify
       end
 
       events = []
-      while ev = Event.consume(data)
+      while ev = Event.consume(data, self)
         events << ev
       end
       events

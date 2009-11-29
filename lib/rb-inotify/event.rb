@@ -5,9 +5,9 @@ module INotify
     attr_reader :name
     attr_reader :notifier
 
-    def self.consume(data)
+    def self.consume(data, notifier)
       return nil if data.empty?
-      ev = new(data)
+      ev = new(data, notifier)
       data.replace data[ev.size..-1]
       ev
     end
