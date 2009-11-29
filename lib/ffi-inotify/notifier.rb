@@ -22,5 +22,27 @@ module INotify
     def watch(path, *flags)
       Watch.new(self, path, *flags)
     end
+
+    def read_events
+      size = 64 * Native::Event.size
+      tries = 1
+
+      begin
+        data = readpartial(size)
+      rescue SystemCallError => er
+        # EINVAL means that there's more data to be read
+        # than will fit in the buffer size
+        raise er unless er.errno == EINVAL || tries == 5
+        size *= 2
+        tries += 1
+        retry
+      end
+
+      events = []
+      while ev = Event.consume(data)
+        events << ev
+      end
+      events
+    end
   end
 end
