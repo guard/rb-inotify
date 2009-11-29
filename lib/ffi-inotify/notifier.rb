@@ -1,3 +1,5 @@
+require 'singleton'
+
 module INotify
   class Notifier < IO
     def initialize
