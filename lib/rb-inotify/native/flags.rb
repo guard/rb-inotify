@@ -1,5 +1,9 @@
 module INotify
   module Native
+    # A module containing all the inotify flags
+    # to be passed to {Notifier#watch}.
+    #
+    # @private
     module Flags
       # File was accessed.
       IN_ACCESS = 0x00000001
@@ -61,11 +65,19 @@ module INotify
       # Event occurred against dir.
       IN_ISDIR = 0x40000000
 
+      # Converts a list of flags to the bitmask that the C API expects.
+      #
+      # @param flags [Array<Symbol>]
+      # @return Fixnum
       def self.to_mask(flags)
         flags.map {|flag| const_get("IN_#{flag.to_s.upcase}")}.
           inject(0) {|mask, flag| mask | flag}
       end
 
+      # Converts a bitmask from the C API into a list of flags.
+      #
+      # @return mask [Fixnum]
+      # @return [Array<Symbol>]
       def self.from_mask(mask)
         constants.select do |c|
           next false unless c =~ /^IN_/
