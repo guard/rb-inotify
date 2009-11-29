@@ -11,8 +11,7 @@ module INotify
         :wd, :int,
         :mask, :uint32,
         :cookie, :uint32,
-        :len, :uint32,
-        :name, :char)
+        :len, :uint32)
     end
 
     attach_function :inotify_init, [], :int

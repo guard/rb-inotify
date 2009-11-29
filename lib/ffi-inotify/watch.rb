@@ -1,13 +1,25 @@
+require 'thread'
+
 module INotify
   class Watch
+    @@watches = {}
+    @@mutex = Mutex.new
+
     attr_reader :notifier
+
+    def self.from_wd(wd)
+      @@mutex.synchronize {@@watches[wd]}
+    end
 
     def initialize(notifier, path, *flags)
       @notifier = notifier
       @wd = Native.inotify_add_watch(@notifier.fd, path,
-        flags.map {|flag| INotify::Native::Flags.const_get("IN_#{flag.to_s.upcase}")}.
-        inject(0) {|mask, flag| mask | flag})
-      return unless @wd < 0
+        Native::Flags.to_mask(flags))
+
+      unless @wd < 0
+        @@mutex.synchronize {@@watches[@wd] = self}
+        return
+      end
 
       raise SystemCallError.new(
         "Failed to watch #{path.inspect}" +

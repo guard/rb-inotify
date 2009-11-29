@@ -60,6 +60,18 @@ module INotify
       IN_IGNORED = 0x00008000
       # Event occurred against dir.
       IN_ISDIR = 0x40000000
+
+      def self.to_mask(flags)
+        flags.map {|flag| const_get("IN_#{flag.to_s.upcase}")}.
+          inject(0) {|mask, flag| mask | flag}
+      end
+
+      def self.from_mask(mask)
+        constants.select do |c|
+          next false unless c =~ /^IN_/
+          const_get(c) & mask != 0
+        end.map {|c| c.sub("IN_", "").downcase.to_sym}
+      end
     end
   end
 end
