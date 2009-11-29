@@ -14,7 +14,7 @@ module INotify
       ptr = FFI::MemoryPointer.from_string(data)
       @native = Native::Event.new(ptr)
       @cookie = @native[:cookie]
-      @name = data[@native.size, @native[:len]]
+      @name = data[@native.size, @native[:len]].gsub(/\0+$/, '')
     end
 
     def callback!
