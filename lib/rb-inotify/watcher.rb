@@ -42,8 +42,11 @@ module INotify
     end
 
     # Disables this Watcher, so that it doesn't fire any more events.
+    #
+    # @raise [SystemCallError] if the watch fails to be disabled for some reason
     def close
-      Native.inotify_rm_watch(@notifier.fd, @id)
+      return if Native.inotify_rm_watch(@notifier.fd, @id) == 0
+      raise SystemCallError.new("Failed to stop watching #{path.inspect}", FFI.errno)
     end
 
     # Creates a new {Watcher}.
