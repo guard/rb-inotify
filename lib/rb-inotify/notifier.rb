@@ -152,7 +152,15 @@ module INotify
     #
     # @see #process
     def run
-      loop {process}
+      @stop = false
+      process until @stop || closed?
+    end
+
+    # Stop watching for filesystem events.
+    # That is, if we're in a \{#run} loop,
+    # exit out as soon as we finish handling the events.
+    def stop
+      @stop = true
     end
 
     # Blocks until there are one or more filesystem events
