@@ -1,6 +1,7 @@
 module INotify
   class Watcher
     attr_reader :notifier
+    attr_reader :flags
     attr_reader :id
 
     def callback!(event)
@@ -10,6 +11,7 @@ module INotify
     def initialize(notifier, path, *flags, &callback)
       @notifier = notifier
       @callback = callback || proc {}
+      @flags = flags.freeze
       @id = Native.inotify_add_watch(@notifier.fd, path,
         Native::Flags.to_mask(flags))
 
