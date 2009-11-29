@@ -1,7 +1,5 @@
 module INotify
   class Watcher
-    @@watchers = {}
-
     attr_reader :notifier
     attr_reader :id
 
