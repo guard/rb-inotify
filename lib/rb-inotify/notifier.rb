@@ -1,5 +1,3 @@
-require 'singleton'
-
 module INotify
   class Notifier < IO
     attr_reader :watchers
