@@ -3,12 +3,11 @@ require 'thread'
 module INotify
   class Watch
     @@watches = {}
-    @@mutex = Mutex.new
 
     attr_reader :notifier
 
     def self.from_wd(wd)
-      @@mutex.synchronize {@@watches[wd]}
+      @@watches[wd]
     end
 
     def initialize(notifier, path, *flags)
@@ -17,7 +16,7 @@ module INotify
         Native::Flags.to_mask(flags))
 
       unless @wd < 0
-        @@mutex.synchronize {@@watches[@wd] = self}
+        @@watches[@wd] = self
         return
       end
 
