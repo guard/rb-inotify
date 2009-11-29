@@ -11,7 +11,7 @@ begin
     gem.homepage = "http://github.com/nex3/rb-notify"
     gem.authors = ["Nathan Weizenbaum"]
     gem.add_dependency "ffi", ">= 0.5.0"
-    gem.add_development_dependency "yard"
+    gem.add_development_dependency "yard", ">= 0.4.0"
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
