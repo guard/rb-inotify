@@ -1,13 +1,13 @@
 require 'thread'
 
 module INotify
-  class Watch
-    @@watches = {}
+  class Watcher
+    @@watchers = {}
 
     attr_reader :notifier
 
     def self.from_wd(wd)
-      @@watches[wd]
+      @@watchers[wd]
     end
 
     def initialize(notifier, path, *flags)
@@ -16,7 +16,7 @@ module INotify
         Native::Flags.to_mask(flags))
 
       unless @wd < 0
-        @@watches[@wd] = self
+        @@watchers[@wd] = self
         return
       end
 

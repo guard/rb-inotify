@@ -20,7 +20,7 @@ module INotify
     attr_reader :fd
 
     def watch(path, *flags)
-      Watch.new(self, path, *flags)
+      Watcher.new(self, path, *flags)
     end
 
     def read_events

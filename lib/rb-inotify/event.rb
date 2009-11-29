@@ -21,8 +21,8 @@ module INotify
       @native.size + @native[:len]
     end
 
-    def watch
-      @watch ||= Watch.from_wd(@native[:wd])
+    def watcher
+      @watcher ||= Watcher.from_wd(@native[:wd])
     end
 
     def flags
