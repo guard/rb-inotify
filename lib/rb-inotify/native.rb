@@ -1,7 +1,5 @@
 require 'ffi'
 
-require 'ffi-inotify/native/flags'
-
 module INotify
   module Native
     extend FFI::Library

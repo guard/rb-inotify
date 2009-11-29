@@ -1,0 +1,5 @@
+require 'rb-inotify/native'
+require 'rb-inotify/native/flags'
+require 'rb-inotify/notifier'
+require 'rb-inotify/watch'
+require 'rb-inotify/event'
