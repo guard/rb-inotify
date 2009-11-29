@@ -3,14 +3,12 @@ module INotify
   # Each {Watcher} can fire many events,
   # which are passed to that watcher's callback.
   class Event
-    # An integer specifying that this event is related to some other event,
-    # which will have the same cookie.
+    # A list of other events that are related to this one.
+    # Currently, this is only used for files that are moved within the same directory:
+    # the `:moved_from` and the `:moved_to` events will be related.
     #
-    # Currently, this is only used for files that are moved within the same directory.
-    # Both the `:moved_from` and the `:moved_to` events will have the same cookie.
-    #
-    # @return [Fixnum]
-    attr_reader :cookie
+    # @return [Array<Event>]
+    attr_reader :related
 
     # The name of the file that the event occurred on.
     # This is only set for events that occur on files in directories;
@@ -23,6 +21,16 @@ module INotify
     #
     # @return [Notifier]
     attr_reader :notifier
+
+    # An integer specifying that this event is related to some other event,
+    # which will have the same cookie.
+    #
+    # Currently, this is only used for files that are moved within the same directory.
+    # Both the `:moved_from` and the `:moved_to` events will have the same cookie.
+    #
+    # @private
+    # @return [Fixnum]
+    attr_reader :cookie
 
     # The {Watcher#id id} of the {Watcher} that fired this event.
     #
@@ -80,6 +88,7 @@ module INotify
     def initialize(data, notifier)
       ptr = FFI::MemoryPointer.from_string(data)
       @native = Native::Event.new(ptr)
+      @related = []
       @cookie = @native[:cookie]
       @name = data[@native.size, @native[:len]].gsub(/\0+$/, '')
       @notifier = notifier

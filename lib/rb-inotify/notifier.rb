@@ -186,9 +186,14 @@ module INotify
       end
 
       events = []
+      cookies = {}
       while ev = Event.consume(data, self)
         events << ev
+        next if ev.cookie == 0
+        cookies[ev.cookie] ||= []
+        cookies[ev.cookie] << ev
       end
+      cookies.each {|c, evs| evs.each {|ev| ev.related.replace(evs - [ev]).freeze}}
       events
     end
   end
