@@ -7,10 +7,6 @@ module INotify
     attr_reader :notifier
     attr_reader :id
 
-    def self.from_id(id)
-      @@watchers[id]
-    end
-
     def callback!(event)
       @callback[event]
     end
@@ -22,7 +18,7 @@ module INotify
         Native::Flags.to_mask(flags))
 
       unless @id < 0
-        @@watchers[@id] = self
+        @notifier.watchers[@id] = self
         return
       end
 

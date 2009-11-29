@@ -3,6 +3,7 @@ module INotify
     attr_reader :cookie
     attr_reader :watcher_id
     attr_reader :name
+    attr_reader :notifier
 
     def self.consume(data)
       return nil if data.empty?
@@ -11,11 +12,12 @@ module INotify
       ev
     end
 
-    def initialize(data)
+    def initialize(data, notifier)
       ptr = FFI::MemoryPointer.from_string(data)
       @native = Native::Event.new(ptr)
       @cookie = @native[:cookie]
       @name = data[@native.size, @native[:len]].gsub(/\0+$/, '')
+      @notifier = notifier
       @watcher_id = @native[:wd]
     end
 
@@ -28,7 +30,7 @@ module INotify
     end
 
     def watcher
-      @watcher ||= Watcher.from_wd(@watcher_id)
+      @watcher ||= @notifier.watchers[@watcher_id]
     end
 
     def flags

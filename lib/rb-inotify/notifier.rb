@@ -2,8 +2,11 @@ require 'singleton'
 
 module INotify
   class Notifier < IO
+    attr_reader :watchers
+
     def initialize
       @fd = Native.inotify_init
+      @watchers = {}
       return super(@fd) unless @fd < 0
 
       raise SystemCallError.new(
