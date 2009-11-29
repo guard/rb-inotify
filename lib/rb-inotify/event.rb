@@ -11,7 +11,7 @@ module INotify
     end
 
     def initialize(data)
-      ptr = FFI::MemoryPointer.new(data)
+      ptr = FFI::MemoryPointer.from_string(data)
       @native = Native::Event.new(ptr)
       @cookie = @native[:cookie]
       @name = data[@native.size, @native[:len]]
