@@ -1,7 +1,46 @@
 module INotify
+  # Notifier wraps a single instance of inotify.
+  # It's possible to have more than one instance,
+  # but usually unnecessary.
+  #
+  # @example
+  #   # Create the notifier
+  #   notifier = INotify::Notifier.new
+  #
+  #   # Run this callback whenever the file path/to/foo.txt is read
+  #   notifier.watch("path/to/foo.txt", :access) do
+  #     puts "Foo.txt was accessed!"
+  #   end
+  #
+  #   # Watch for any file in the directory being deleted
+  #   # or moved out of the directory.
+  #   notifier.watch("path/to/directory", :delete, :moved_from) do |event|
+  #     # The #name field of the event object contains the name of the affected file
+  #     puts "#{event.name} is no longer in the directory!"
+  #   end
+  #
+  #   # Nothing happens until you run the notifier!
+  #   notifier.run
+  #
+  # Notifier is a subclass of IO with a fully-functional file descriptor,
+  # so it can be passed to functions like `#select`.
   class Notifier < IO
+    # A hash from {Watcher} ids to the instances themselves.
+    #
+    # @private
+    # @return [{Fixnum => Watcher}]
     attr_reader :watchers
 
+    # The underlying file descriptor for this notifier.
+    # This is a valid OS file descriptor, and can be used as such.
+    #
+    # @return [Fixnum]
+    attr_reader :fd
+
+    # Creates a new {Notifier}.
+    #
+    # @return [Notifier]
+    # @raise [SystemCallError] if inotify failed to initialize for some reason
     def initialize
       @fd = Native.inotify_init
       @watchers = {}
@@ -18,20 +57,116 @@ module INotify
         FFI.errno)
     end
 
-    attr_reader :fd
-
+    # Watches a file or directory for changes,
+    # calling the callback when there are.
+    # This is only activated once \{#process} or \{#run} is called.
+    #
+    # ## Flags
+    #
+    # `:access`
+    # : A file is accessed (that is, read).
+    #
+    # `:attrib`
+    # : A file's metadata is changed (e.g. permissions, timestamps, etc).
+    #
+    # `:close_write`
+    # : A file that was opened for writing is closed.
+    #
+    # `:close_nowrite`
+    # : A file that was not opened for writing is closed.
+    #
+    # `:modify`
+    # : A file is modified.
+    #
+    # `:open`
+    # : A file is opened.
+    #
+    # ### Directory-Specific Flags
+    #
+    # These flags only apply when a directory is being watched.
+    #
+    # `:moved_from`
+    # : A file is moved out of the watched directory.
+    #
+    # `:moved_to`
+    # : A file is moved into the watched directory.
+    #
+    # `:create`
+    # : A file is created in the watched directory.
+    #
+    # `:delete`
+    # : A file is deleted in the watched directory.
+    #
+    # `:delete_self`
+    # : The watched file or directory itself is deleted.
+    #
+    # `:move_self`
+    # : The watched file or directory itself is moved.
+    #
+    # ### Helper Flags
+    #
+    # These flags are just combinations of the flags above.
+    #
+    # `:close`
+    # : Either `:close_write` or `:close_nowrite` is activated.
+    #
+    # `:move`
+    # : Either `:moved_from` or `:moved_to` is activated.
+    #
+    # `:all_events`
+    # : Any event above is activated.
+    #
+    # ### Options Flags
+    #
+    # These flags don't actually specify events.
+    # Instead, they specify options for the watcher.
+    #
+    # `:onlydir`
+    # : Only watch the path if it's a directory.
+    #
+    # `:dont_follow`
+    # : Don't follow symlinks.
+    #
+    # `:mask_add`
+    # : Add these flags to the pre-existing flags for this path.
+    #
+    # `:oneshot`
+    # : Only send the event once, then shut down the watcher.
+    #
+    # @param path [String] The path to the file or directory
+    # @param flags [Array<Symbol>] Which events to watch for
+    # @yield [event] A block that will be called
+    #   whenever one of the specified events occur
+    # @yieldparam event [Event] The Event object containing information
+    #   about the event that occured
+    # @return [Watcher] A Watcher set up to watch this path for these events
     def watch(path, *flags, &callback)
       Watcher.new(self, path, *flags, &callback)
     end
 
+    # Starts the notifier watching for filesystem events.
+    # Blocks forever and never returns.
+    #
+    # @see #process
     def run
       loop {process}
     end
 
+    # Blocks until there are one or more filesystem events
+    # that this notifier has watchers registered for.
+    # Once there are events, the appropriate callbacks are called
+    # and this function returns.
+    #
+    # @see #run
     def process
       read_events.each {|event| event.callback!}
     end
 
+    # Blocks until there are one or more filesystem events
+    # that this notifier has watchers registered for.
+    # Once there are events, returns their {Event} objects.
+    #
+    # @private
     def read_events
       size = 64 * Native::Event.size
       tries = 1
