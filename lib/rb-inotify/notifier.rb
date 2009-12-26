@@ -21,9 +21,6 @@ module INotify
   #
   #   # Nothing happens until you run the notifier!
   #   notifier.run
-  #
-  # Notifier is a subclass of IO with a fully-functional file descriptor,
-  # so it can be passed to functions like `#select`.
   class Notifier
     # A hash from {Watcher} ids to the instances themselves.
     #
@@ -32,7 +29,8 @@ module INotify
     attr_reader :watchers
 
     # The underlying file descriptor for this notifier.
-    # This is a valid OS file descriptor, and can be used as such.
+    # This is a valid OS file descriptor, and can be used as such
+    # (except under JRuby -- see \{#to\_io}).
     #
     # @return [Fixnum]
     attr_reader :fd
@@ -55,6 +53,22 @@ module INotify
         else; ""
         end,
         FFI.errno)
+    end
+
+    # Returns a Ruby IO object wrapping the underlying file descriptor.
+    # Since this file descriptor is fully functional (except under JRuby),
+    # this IO object can be used in any way a Ruby-created IO object can.
+    # This includes passing it to functions like `#select`.
+    #
+    # **This is not supported under JRuby**.
+    # JRuby currently doesn't use native file descriptors for the IO object,
+    # so we can't use this file descriptor as a stand-in.
+    #
+    # @return [IO] An IO object wrapping the file descriptor
+    # @raise [NotImplementedError] if this is being called in JRuby
+    def to_io
+      raise NotImplementedError.new("INotify::Notifier#to_io is not supported under JRuby") if RUBY_PLATFORM =~ /java/
+      IO.new(@fd)
     end
 
     # Watches a file or directory for changes,
