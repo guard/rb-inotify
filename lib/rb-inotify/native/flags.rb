@@ -68,7 +68,7 @@ module INotify
       # Converts a list of flags to the bitmask that the C API expects.
       #
       # @param flags [Array<Symbol>]
-      # @return Fixnum
+      # @return [Fixnum]
       def self.to_mask(flags)
         flags.map {|flag| const_get("IN_#{flag.to_s.upcase}")}.
           inject(0) {|mask, flag| mask | flag}
@@ -76,7 +76,7 @@ module INotify
 
       # Converts a bitmask from the C API into a list of flags.
       #
-      # @return mask [Fixnum]
+      # @param mask [Fixnum]
       # @return [Array<Symbol>]
       def self.from_mask(mask)
         constants.select do |c|
