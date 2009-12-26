@@ -39,12 +39,13 @@ and then continue on your merry way:
 
 Sometimes it's necessary to have finer control over the underlying IO operations
 than is provided by the simple callback API.
-The trick to this is that the notifier is a fully-functional IO object,
+The trick to this is that the \{INotify::Notifier#to_io Notifier#to_io} method
+returns a fully-functional IO object,
 with a file descriptor and everything.
 This means, for example, that it can be passed to `IO#select`:
 
      # Wait 10 seconds for an event then give up
-     if IO.select([notifier], [], [], 10)
+     if IO.select([notifier.to_io], [], [], 10)
        notifier.process
      end
 
@@ -53,7 +54,11 @@ It can even be used with EventMachine:
      require 'eventmachine'
 
      EM.run do
-       EM.watch notifier do
+       EM.watch notifier.to_io do
          notifier.process
        end
      end
+
+Unfortunately, this currently doesn't work under JRuby.
+JRuby currently doesn't use native file descriptors for the IO object,
+so we can't use the notifier's file descriptor as a stand-in.
