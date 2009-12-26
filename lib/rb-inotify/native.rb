@@ -23,5 +23,7 @@ module INotify
     attach_function :inotify_init, [], :int
     attach_function :inotify_add_watch, [:int, :string, :uint32], :int
     attach_function :inotify_rm_watch, [:int, :uint32], :int
+
+    attach_function :read, [:int, :pointer, :size_t], :ssize_t
   end
 end

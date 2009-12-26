@@ -24,7 +24,7 @@ module INotify
   #
   # Notifier is a subclass of IO with a fully-functional file descriptor,
   # so it can be passed to functions like `#select`.
-  class Notifier < IO
+  class Notifier
     # A hash from {Watcher} ids to the instances themselves.
     #
     # @private
@@ -44,7 +44,7 @@ module INotify
     def initialize
       @fd = Native.inotify_init
       @watchers = {}
-      return super(@fd) unless @fd < 0
+      return unless @fd < 0
 
       raise SystemCallError.new(
         "Failed to initialize inotify" +
@@ -153,7 +153,7 @@ module INotify
     # @see #process
     def run
       @stop = false
-      process until @stop || closed?
+      process until @stop
     end
 
     # Stop watching for filesystem events.
@@ -203,6 +203,27 @@ module INotify
       end
       cookies.each {|c, evs| evs.each {|ev| ev.related.replace(evs - [ev]).freeze}}
       events
+    end
+
+    private
+
+    # Same as IO#readpartial, or as close as we need.
+    def readpartial(size)
+      buffer = FFI::MemoryPointer.new(:char, size)
+      size_read = Native.read(fd, buffer, size)
+      return buffer.read_string(size_read) if size_read >= 0
+
+      raise SystemCallError.new("Error reading inotify events" +
+        case FFI.errno
+        when Errno::EAGAIN::Errno; ": no data available for non-blocking I/O"
+        when Errno::EBADF::Errno; ": invalid or closed file descriptor"
+        when Errno::EFAULT::Errno; ": invalid buffer"
+        when Errno::EINVAL::Errno; ": invalid file descriptor"
+        when Errno::EIO::Errno; ": I/O error"
+        when Errno::EISDIR::Errno; ": file descriptor is a directory"
+        else; ""
+        end,
+        FFI.errno)
     end
   end
 end
