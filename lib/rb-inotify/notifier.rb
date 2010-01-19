@@ -60,6 +60,10 @@ module INotify
     # this IO object can be used in any way a Ruby-created IO object can.
     # This includes passing it to functions like `#select`.
     #
+    # Note that this always returns the same IO object.
+    # Creating lots of IO objects for the same file descriptor
+    # can cause some odd problems.
+    #
     # **This is not supported under JRuby**.
     # JRuby currently doesn't use native file descriptors for the IO object,
     # so we can't use this file descriptor as a stand-in.
@@ -68,7 +72,7 @@ module INotify
     # @raise [NotImplementedError] if this is being called in JRuby
     def to_io
       raise NotImplementedError.new("INotify::Notifier#to_io is not supported under JRuby") if RUBY_PLATFORM =~ /java/
-      IO.new(@fd)
+      @io ||= IO.new(@fd)
     end
 
     # Watches a file or directory for changes,
