@@ -13,6 +13,11 @@ module INotify
     # The name of the file that the event occurred on.
     # This is only set for events that occur on files in directories;
     # otherwise, it's `""`.
+    # Similarly, if the event is being fired for the directory itself
+    # the name will be `""`
+    #
+    # This pathname is relative to the enclosing directory.
+    # For the absolute pathname, use \{#absolute\_name}.
     #
     # @return [String]
     attr_reader :name
@@ -43,6 +48,19 @@ module INotify
     # @return [Watcher]
     def watcher
       @watcher ||= @notifier.watchers[@watcher_id]
+    end
+
+    # The absolute path of the file that the event occurred on.
+    #
+    # This is actually only as absolute as the path passed to the {Watcher}
+    # that created this event.
+    # However, it is relative to the working directory,
+    # assuming that hasn't changed since the watcher started.
+    #
+    # @return [String]
+    def absolute_name
+      return watcher.path if name.empty?
+      return File.join(watcher.path, name)
     end
 
     # Returns the flags that describe this event.
