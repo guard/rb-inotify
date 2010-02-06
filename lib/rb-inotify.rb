@@ -9,4 +9,9 @@ require 'rb-inotify/event'
 # * {Notifier} -- The main class, where the notifications are set up
 # * {Watcher} -- A watcher for a single file or directory
 # * {Event} -- An filesystem event notification
-module INotify; end
+module INotify
+  # An array containing the version number of rb-inotify.
+  # The numbers in the array are the major, minor, and patch versions,
+  # respectively.
+  VERSION = [0, 5, 0]
+end
