@@ -18,6 +18,29 @@ rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
 end
 
+module Jeweler::VersionHelper::PlaintextExtension
+  def write_with_inotify
+    write_without_inotify
+    filename = File.join(File.dirname(__FILE__), "lib/rb-inotify.rb")
+    text = File.read(filename)
+    File.open(filename, 'w') do |f|
+      f.write text.gsub(/^(  VERSION = ).*/, '\1' + [major, minor, patch].inspect)
+    end
+  end
+  alias_method :write_without_inotify, :write
+  alias_method :write, :write_with_inotify
+end
+
+class Jeweler::Commands::Version::Base
+  def commit_version_with_inotify
+    return unless self.repo
+    self.repo.add(File.join(File.dirname(__FILE__), "lib/rb-inotify.rb"))
+    commit_version_without_inotify
+  end
+  alias_method :commit_version_without_inotify, :commit_version
+  alias_method :commit_version, :commit_version_with_inotify
+end
+
 begin
   require 'yard'
   YARD::Rake::YardocTask.new
