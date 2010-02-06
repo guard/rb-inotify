@@ -18,6 +18,11 @@ module INotify
     #
     # This pathname is relative to the enclosing directory.
     # For the absolute pathname, use \{#absolute\_name}.
+    # Note that when the `:recursive` flag is passed to {Notifier#watch},
+    # events in nested subdirectories will still have a `#name` field
+    # relative to their immediately enclosing directory.
+    # For example, an event on the file `"foo/bar/baz"`
+    # will have name `"baz"`.
     #
     # @return [String]
     attr_reader :name

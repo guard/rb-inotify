@@ -79,6 +79,10 @@ module INotify
     # calling the callback when there are.
     # This is only activated once \{#process} or \{#run} is called.
     #
+    # **Note that by default, this does not recursively watch subdirectories
+    # of the watched directory**.
+    # To do so, use the `:recursive` flag.
+    #
     # ## Flags
     #
     # `:access`
@@ -151,6 +155,14 @@ module INotify
     # `:oneshot`
     # : Only send the event once, then shut down the watcher.
     #
+    # `:recursive`
+    # : Recursively watch any subdirectories that are created.
+    #   Note that this is a feature of rb-inotify,
+    #   rather than of inotify itself, which can only watch one level of a directory.
+    #   This means that the {Event#name} field
+    #   will contain only the basename of the modified file.
+    #   When using `:recursive`, {Event#absolute_name} should always be used.
+    #
     # @param path [String] The path to the file or directory
     # @param flags [Array<Symbol>] Which events to watch for
     # @yield [event] A block that will be called
@@ -162,7 +174,15 @@ module INotify
     #   e.g. if the file isn't found, read access is denied,
     #   or the flags don't contain any events
     def watch(path, *flags, &callback)
-      Watcher.new(self, path, *flags, &callback)
+      return Watcher.new(self, path, *flags, &callback) unless flags.include?(:recursive)
+      Dir[File.join(path, '*/')].each {|d| watch(d, *flags, &callback)}
+
+      rec_flags = [:create, :moved_to]
+      return watch(path, *((flags - [:recursive]) | rec_flags)) do |event|
+        callback.call(event) unless (flags & event.flags).empty?
+        next if (rec_flags & event.flags).empty? || !event.flags.include?(:isdir)
+        watch(event.absolute_name, *flags, &callback)
+      end
     end
 
     # Starts the notifier watching for filesystem events.
