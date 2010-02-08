@@ -186,7 +186,7 @@ module INotify
     end
 
     # Starts the notifier watching for filesystem events.
-    # Blocks forever and never returns.
+    # Blocks until \{#stop} is called.
     #
     # @see #process
     def run
