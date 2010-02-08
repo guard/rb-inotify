@@ -4,6 +4,8 @@ This is a simple wrapper over the [inotify](http://en.wikipedia.org/wiki/Inotify
 for monitoring changes to files and directories.
 It uses the [FFI](http://wiki.github.com/ffi/ffi) gem to avoid having to compile a C extension.
 
+[API documentation is available on rdoc.info](http://rdoc.info/projects/nex3/rb-inotify).
+
 ## Basic Usage
 
 The API is similar to the inotify C API, but with a more Rubyish feel.
