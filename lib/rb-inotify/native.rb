@@ -8,6 +8,7 @@ module INotify
   # @private
   module Native
     extend FFI::Library
+    ffi_lib "c"
 
     # The C struct describing an inotify event.
     #
