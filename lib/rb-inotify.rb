@@ -13,5 +13,5 @@ module INotify
   # An array containing the version number of rb-inotify.
   # The numbers in the array are the major, minor, and patch versions,
   # respectively.
-  VERSION = [0, 6, 0]
+  VERSION = [0, 7, 0]
 end
