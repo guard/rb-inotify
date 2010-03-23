@@ -79,7 +79,7 @@ module INotify
       # @param mask [Fixnum]
       # @return [Array<Symbol>]
       def self.from_mask(mask)
-        constants.select do |c|
+        constants.map {|c| c.to_s}.select do |c|
           next false unless c =~ /^IN_/
           const_get(c) & mask != 0
         end.map {|c| c.sub("IN_", "").downcase.to_sym} - [:all_events]
