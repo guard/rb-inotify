@@ -175,7 +175,13 @@ module INotify
     #   or the flags don't contain any events
     def watch(path, *flags, &callback)
       return Watcher.new(self, path, *flags, &callback) unless flags.include?(:recursive)
-      Dir[File.join(path, '*/')].each {|d| watch(d, *flags, &callback)}
+      Dir.entries(path).each {|d|
+        next if d == '.' || d == '..'
+        d = File.join(path, d)
+        if Pathname.new(d).directory? then
+          watch(d, *flags, &callback)
+        end
+      }
 
       rec_flags = [:create, :moved_to]
       return watch(path, *((flags - [:recursive]) | rec_flags)) do |event|
