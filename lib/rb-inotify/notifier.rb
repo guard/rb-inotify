@@ -22,6 +22,11 @@ module INotify
   #   # Nothing happens until you run the notifier!
   #   notifier.run
   class Notifier
+    # A list of directories that should never be recursively watched.
+    #
+    # * Files in `/dev/fd` sometimes register as directories, but are not enumerable.
+    RECURSIVE_BLACKLIST = %w[/dev/fd]
+
     # A hash from {Watcher} ids to the instances themselves.
     #
     # @private
@@ -178,7 +183,7 @@ module INotify
       Dir.entries(path).each do |d|
         next if d == '.' || d == '..'
         d = File.join(path, d)
-        watch(d, *flags, &callback) if File.directory?(d)
+        watch(d, *flags, &callback) if !RECURSIVE_BLACKLIST.include?(d) && File.directory?(d)
       end
 
       rec_flags = [:create, :moved_to]
