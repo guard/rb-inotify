@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
      "lib/rb-inotify/watcher.rb",
      "rb-inotify.gemspec"
   ]
-  s.homepage = %q{http://github.com/nex3/rb-notify}
+  s.homepage = %q{http://github.com/nex3/rb-inotify}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.5}
