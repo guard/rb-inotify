@@ -267,9 +267,11 @@ module INotify
 
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
-      buffer = FFI::MemoryPointer.new(:char, size)
-      size_read = Native.read(fd, buffer, size)
-      return buffer.read_string(size_read) if size_read >= 0
+      begin
+        buffer = FFI::MemoryPointer.new(:char, size)
+        size_read = Native.read(fd, buffer, size)
+        return buffer.read_string(size_read) if size_read >= 0
+      end while FFI.errno == Errno::EINTR::Errno
 
       raise SystemCallError.new("Error reading inotify events" +
         case FFI.errno
