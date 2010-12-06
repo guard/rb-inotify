@@ -18,6 +18,9 @@ rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
 end
 
+task(:permissions) {sh %{chmod -R a+r .}}
+Rake::Task[:build].prerequisites.unshift('permissions')
+
 module Jeweler::VersionHelper::PlaintextExtension
   def write_with_inotify
     write_without_inotify
