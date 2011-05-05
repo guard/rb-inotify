@@ -180,9 +180,8 @@ module INotify
     #   or the flags don't contain any events
     def watch(path, *flags, &callback)
       return Watcher.new(self, path, *flags, &callback) unless flags.include?(:recursive)
-      Dir.entries(path).each do |d|
-        next if d == '.' || d == '..'
-        d = File.join(path, d)
+
+      Dir.glob(File.join(path, '*')).each do |d|
         watch(d, *flags, &callback) if !RECURSIVE_BLACKLIST.include?(d) && File.directory?(d)
       end
 
