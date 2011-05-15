@@ -58,7 +58,7 @@ module INotify
       @callback = callback || proc {}
       @path = path
       @flags = flags.freeze
-      @id = Native.inotify_add_watch(@notifier.fd, path,
+      @id = Native.inotify_add_watch(@notifier.fd, path.dup,
         Native::Flags.to_mask(flags))
 
       unless @id < 0
