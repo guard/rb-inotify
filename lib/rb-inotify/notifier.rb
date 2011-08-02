@@ -230,7 +230,7 @@ module INotify
       tries = 1
 
       begin
-        data = readpartial(size)
+        data = IO.open(fd, 'r'){ |f| f.readpartial(size) }
       rescue SystemCallError => er
         # EINVAL means that there's more data to be read
         # than will fit in the buffer size
@@ -263,29 +263,5 @@ module INotify
        FFI.errno)
     end
 
-    private
-
-    # Same as IO#readpartial, or as close as we need.
-    def readpartial(size)
-      tries = 0
-      begin
-        tries += 1
-        buffer = FFI::MemoryPointer.new(:char, size)
-        size_read = Native.read(fd, buffer, size)
-        return buffer.read_string(size_read) if size_read >= 0
-      end while FFI.errno == Errno::EINTR::Errno && tries <= 5
-
-      raise SystemCallError.new("Error reading inotify events" +
-        case FFI.errno
-        when Errno::EAGAIN::Errno; ": no data available for non-blocking I/O"
-        when Errno::EBADF::Errno; ": invalid or closed file descriptor"
-        when Errno::EFAULT::Errno; ": invalid buffer"
-        when Errno::EINVAL::Errno; ": invalid file descriptor"
-        when Errno::EIO::Errno; ": I/O error"
-        when Errno::EISDIR::Errno; ": file descriptor is a directory"
-        else; ""
-        end,
-        FFI.errno)
-    end
   end
 end
