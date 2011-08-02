@@ -190,7 +190,10 @@ module INotify
       return watch(path, *((flags - [:recursive]) | rec_flags)) do |event|
         callback.call(event) if flags.include?(:all_events) || !(flags & event.flags).empty?
         next if (rec_flags & event.flags).empty? || !event.flags.include?(:isdir)
-        watch(event.absolute_name, *flags, &callback)
+        begin
+          watch(event.absolute_name, *flags, &callback)
+        rescue Errno::ENOENT
+        end
       end
     end
 
