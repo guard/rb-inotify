@@ -40,6 +40,12 @@ module INotify
     # @return [Fixnum]
     attr_reader :fd
 
+    # @return [Boolean] Whether or not this Ruby implementation supports
+    #   wrapping the native file descriptor in a Ruby IO wrapper.
+    def self.supports_ruby_io?
+      RUBY_PLATFORM !~ /java/
+    end
+
     # Creates a new {Notifier}.
     #
     # @return [Notifier]
@@ -76,7 +82,9 @@ module INotify
     # @return [IO] An IO object wrapping the file descriptor
     # @raise [NotImplementedError] if this is being called in JRuby
     def to_io
-      raise NotImplementedError.new("INotify::Notifier#to_io is not supported under JRuby") if RUBY_PLATFORM =~ /java/
+      unless self.class.supports_ruby_io?
+        raise NotImplementedError.new("INotify::Notifier#to_io is not supported under JRuby")
+      end
       @io ||= IO.new(@fd)
     end
 
@@ -268,6 +276,9 @@ module INotify
 
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
+      # Use Ruby's readpartial if possible, to avoid blocking other threads.
+      return to_io.readpartial(size) if self.class.supports_ruby_io?
+
       tries = 0
       begin
         tries += 1
