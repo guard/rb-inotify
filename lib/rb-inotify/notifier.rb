@@ -220,11 +220,25 @@ module INotify
       read_events.each {|event| event.callback!}
     end
 
+    # Close the notifier.
+    #
+    # @raise [SystemCallError] if closing the underlying file descriptor fails.
+    def close
+      return if Native.close(@fd) == 0
+
+      raise SystemCallError.new("Failed to properly close inotify socket" +
+       case FFI.errno
+       when Errno::EBADF::Errno; ": invalid or closed file descriptior"
+       when Errno::EIO::Errno; ": an I/O error occured"
+       end,
+       FFI.errno)
+    end
+
+    private
+
     # Blocks until there are one or more filesystem events
     # that this notifier has watchers registered for.
     # Once there are events, returns their {Event} objects.
-    #
-    # @private
     def read_events
       size = 64 * Native::Event.size
       tries = 1
@@ -251,19 +265,6 @@ module INotify
       cookies.each {|c, evs| evs.each {|ev| ev.related.replace(evs - [ev]).freeze}}
       events
     end
-
-    def close
-      return if Native.close(@fd) == 0
-
-      raise SystemCallError.new("Failed to properly close inotify socket" +
-       case FFI.errno
-       when Errno::EBADF::Errno; ": invalid or closed file descriptior"
-       when Errno::EIO::Errno; ": an I/O error occured"
-       end,
-       FFI.errno)
-    end
-
-    private
 
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
