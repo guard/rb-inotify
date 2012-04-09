@@ -87,6 +87,7 @@ module INotify
       @flags ||= Native::Flags.from_mask(@native[:mask])
     end
 
+    EMPTY = "".freeze
     # Constructs an {Event} object from a string of binary data,
     # and destructively modifies the string to get rid of the initial segment
     # used to construct the Event.
@@ -98,7 +99,7 @@ module INotify
     def self.consume(data, notifier)
       return nil if data.empty?
       ev = new(data, notifier)
-      data.replace data[ev.size..-1]
+      data[0, ev.size] = EMPTY
       ev
     end
 
