@@ -88,6 +88,9 @@ module INotify
     end
 
     EMPTY = "".freeze
+    ZERO = "\0".freeze
+    UNPACK_FORMAT = "iLLL".freeze
+
     # Constructs an {Event} object from a string of binary data,
     # and destructively modifies the string to get rid of the initial segment
     # used to construct the Event.
@@ -110,9 +113,10 @@ module INotify
     # @param data [String] The data string
     # @param notifier [Notifier] The {Notifier} that fired the event
     def initialize(data, notifier)
-      @watcher_id, @mask, @cookie, @len = data.unpack("iLLL")
+      @watcher_id, @mask, @cookie, @len = data.unpack(UNPACK_FORMAT)
       @related = []
-      @name = data[Native::EventSize, @len].gsub(/\0+$/, '')
+      @name = data[Native::EventSize, @len]
+      @name.chomp!(ZERO)
       @notifier = notifier
 
       raise Exception.new("inotify event queue has overflowed.") if @mask & Native::Flags::IN_Q_OVERFLOW != 0
