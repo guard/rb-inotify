@@ -253,7 +253,7 @@ module INotify
     # that this notifier has watchers registered for.
     # Once there are events, returns their {Event} objects.
     def read_events
-      size = 64 * Native::Event.size
+      size = 64 * Native::EventSize
       tries = 1
 
       begin

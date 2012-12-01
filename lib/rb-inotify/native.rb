@@ -10,16 +10,8 @@ module INotify
     extend FFI::Library
     ffi_lib "c"
 
-    # The C struct describing an inotify event.
-    #
     # @private
-    class Event < FFI::Struct
-      layout(
-        :wd, :int,
-        :mask, :uint32,
-        :cookie, :uint32,
-        :len, :uint32)
-    end
+    EventSize = 16
 
     attach_function :inotify_init, [], :int
     attach_function :inotify_add_watch, [:int, :string, :uint32], :int
