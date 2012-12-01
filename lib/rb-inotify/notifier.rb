@@ -247,11 +247,11 @@ module INotify
        FFI.errno)
     end
 
-    private
-
     # Blocks until there are one or more filesystem events
     # that this notifier has watchers registered for.
     # Once there are events, returns their {Event} objects.
+    #
+    # {#run} or {#process} are ususally preferable to calling this directly.
     def read_events
       size = 64 * Native::Event.size
       tries = 1
@@ -278,6 +278,8 @@ module INotify
       cookies.each {|c, evs| evs.each {|ev| ev.related.replace(evs - [ev]).freeze}}
       events
     end
+
+    private
 
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
