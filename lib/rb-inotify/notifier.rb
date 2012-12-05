@@ -189,7 +189,8 @@ module INotify
     def watch(path, *flags, &callback)
       return Watcher.new(self, path, *flags, &callback) unless flags.include?(:recursive)
 
-      Dir.glob(File.join(path, '*'), File::FNM_DOTMATCH).each do |d|
+      Dir.new(path).each do |base|
+        d = File.join(path, base)
         binary_d = d.respond_to?(:force_encoding) ? d.dup.force_encoding('BINARY') : d
         next if binary_d =~ /\/\.\.?$/ # Current or parent directory
         watch(d, *flags, &callback) if !RECURSIVE_BLACKLIST.include?(d) && File.directory?(d)
