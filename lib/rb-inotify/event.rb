@@ -84,8 +84,12 @@ module INotify
     #
     # @return [Array<Symbol>]
     def flags
-      @flags ||= Native::Flags.from_mask(@native[:mask])
+      @flags ||= Native::Flags.from_mask(@mask)
     end
+
+    EMPTY = "".freeze
+    ZERO = "\0".freeze
+    UNPACK_FORMAT = "iLLL".freeze
 
     # Constructs an {Event} object from a string of binary data,
     # and destructively modifies the string to get rid of the initial segment
@@ -98,7 +102,7 @@ module INotify
     def self.consume(data, notifier)
       return nil if data.empty?
       ev = new(data, notifier)
-      data.replace data[ev.size..-1]
+      data[0, ev.size] = EMPTY
       ev
     end
 
@@ -109,15 +113,13 @@ module INotify
     # @param data [String] The data string
     # @param notifier [Notifier] The {Notifier} that fired the event
     def initialize(data, notifier)
-      ptr = FFI::MemoryPointer.from_string(data)
-      @native = Native::Event.new(ptr)
+      @watcher_id, @mask, @cookie, @len = data.unpack(UNPACK_FORMAT)
       @related = []
-      @cookie = @native[:cookie]
-      @name = data[@native.size, @native[:len]].gsub(/\0+$/, '')
+      @name = data[Native::EventSize, @len]
+      @name.chomp!(ZERO)
       @notifier = notifier
-      @watcher_id = @native[:wd]
 
-      raise Exception.new("inotify event queue has overflowed.") if @native[:mask] & Native::Flags::IN_Q_OVERFLOW != 0
+      raise Exception.new("inotify event queue has overflowed.") if @mask & Native::Flags::IN_Q_OVERFLOW != 0
     end
 
     # Calls the callback of the watcher that fired this event,
@@ -133,7 +135,7 @@ module INotify
     #
     # @return [Fixnum]
     def size
-      @native.size + @native[:len]
+      Native::EventSize + @len
     end
   end
 end

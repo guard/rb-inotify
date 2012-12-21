@@ -21,7 +21,7 @@ module INotify
   #
   #   # Nothing happens until you run the notifier!
   #   notifier.run
-  class Notifier
+  module NotifierMixin
     # A list of directories that should never be recursively watched.
     #
     # * Files in `/dev/fd` sometimes register as directories, but are not enumerable.
@@ -33,37 +33,10 @@ module INotify
     # @return [{Fixnum => Watcher}]
     attr_reader :watchers
 
-    # The underlying file descriptor for this notifier.
-    # This is a valid OS file descriptor, and can be used as such
-    # (except under JRuby -- see \{#to\_io}).
-    #
-    # @return [Fixnum]
-    attr_reader :fd
-
     # @return [Boolean] Whether or not this Ruby implementation supports
     #   wrapping the native file descriptor in a Ruby IO wrapper.
     def self.supports_ruby_io?
       RUBY_PLATFORM !~ /java/
-    end
-
-    # Creates a new {Notifier}.
-    #
-    # @return [Notifier]
-    # @raise [SystemCallError] if inotify failed to initialize for some reason
-    def initialize
-      @fd = Native.inotify_init
-      @watchers = {}
-      return unless @fd < 0
-
-      raise SystemCallError.new(
-        "Failed to initialize inotify" +
-        case FFI.errno
-        when Errno::EMFILE::Errno; ": the user limit on the total number of inotify instances has been reached."
-        when Errno::ENFILE::Errno; ": the system limit on the total number of file descriptors has been reached."
-        when Errno::ENOMEM::Errno; ": insufficient kernel memory is available."
-        else; ""
-        end,
-        FFI.errno)
     end
 
     # Returns a Ruby IO object wrapping the underlying file descriptor.
@@ -82,10 +55,7 @@ module INotify
     # @return [IO] An IO object wrapping the file descriptor
     # @raise [NotImplementedError] if this is being called in JRuby
     def to_io
-      unless self.class.supports_ruby_io?
-        raise NotImplementedError.new("INotify::Notifier#to_io is not supported under JRuby")
-      end
-      @io ||= IO.new(@fd)
+      raise NotMethodError, "#to_io should be manually implemented"
     end
 
     # Watches a file or directory for changes,
@@ -234,27 +204,13 @@ module INotify
       read_events.each {|event| event.callback!}
     end
 
-    # Close the notifier.
-    #
-    # @raise [SystemCallError] if closing the underlying file descriptor fails.
-    def close
-      return if Native.close(@fd) == 0
-
-      raise SystemCallError.new("Failed to properly close inotify socket" +
-       case FFI.errno
-       when Errno::EBADF::Errno; ": invalid or closed file descriptior"
-       when Errno::EIO::Errno; ": an I/O error occured"
-       end,
-       FFI.errno)
-    end
-
     private
 
     # Blocks until there are one or more filesystem events
     # that this notifier has watchers registered for.
     # Once there are events, returns their {Event} objects.
     def read_events
-      size = 64 * Native::Event.size
+      size = 64 * Native::EventSize
       tries = 1
 
       begin
@@ -280,11 +236,82 @@ module INotify
       events
     end
 
+    def check_fd(fd)
+      if fd < 0
+        raise SystemCallError.new(
+          "Failed to initialize inotify" +
+          case FFI.errno
+          when Errno::EMFILE::Errno; ": the user limit on the total number of inotify instances has been reached."
+          when Errno::ENFILE::Errno; ": the system limit on the total number of file descriptors has been reached."
+          when Errno::ENOMEM::Errno; ": insufficient kernel memory is available."
+          else; ""
+          end,
+          FFI.errno)
+      end
+      fd
+    end
+  end
+
+  class NotifierNative < IO
+    include NotifierMixin
+
+    # Creates a new {Notifier}.
+    #
+    # @return [Notifier]
+    # @raise [SystemCallError] if inotify failed to initialize for some reason
+    def initialize
+      super check_fd(Native.inotify_init)
+      @watchers = {}
+    end
+
+    alias :fd :fileno
+
+    def to_io # :nodoc:
+      self
+    end
+  end
+
+  class NotifierProxy
+    include NotifierMixin
+
+    # The underlying file descriptor for this notifier.
+    # This is a valid OS file descriptor, and can be used as such
+    # (except under JRuby -- see \{#to\_io}).
+    #
+    # @return [Fixnum]
+    attr_reader :fd
+
+    # Creates a new {Notifier}.
+    #
+    # @return [Notifier]
+    # @raise [SystemCallError] if inotify failed to initialize for some reason
+    def initialize
+      @fd = check_fd(Native.inotify_init)
+      @watchers = {}
+    end
+
+    def to_io # :nodoc:
+      raise NotImplementedError.new("INotify::Notifier#to_io is not supported under JRuby")
+    end
+
+    # Close the notifier.
+    #
+    # @raise [SystemCallError] if closing the underlying file descriptor fails.
+    def close
+      return if Native.close(@fd) == 0
+
+      raise SystemCallError.new("Failed to properly close inotify socket" +
+       case FFI.errno
+       when Errno::EBADF::Errno; ": invalid or closed file descriptior"
+       when Errno::EIO::Errno; ": an I/O error occured"
+       end,
+       FFI.errno)
+    end
+
+    private
+
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
-      # Use Ruby's readpartial if possible, to avoid blocking other threads.
-      return to_io.readpartial(size) if self.class.supports_ruby_io?
-
       tries = 0
       begin
         tries += 1
@@ -305,5 +332,11 @@ module INotify
         end,
         FFI.errno)
     end
+  end
+
+  if NotifierMixin.supports_ruby_io?
+    Notifier = NotifierNative
+  else
+    Notifier = NotifierProxy
   end
 end
