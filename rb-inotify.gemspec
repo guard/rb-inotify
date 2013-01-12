@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{rb-inotify}
-  s.version = "0.8.8"
+  s.name = "rb-inotify"
+  s.version = "0.9.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nathan Weizenbaum"]
-  s.date = %q{2011-09-27}
-  s.description = %q{A Ruby wrapper for Linux's inotify, using FFI}
-  s.email = %q{nex342@gmail.com}
+  s.date = "2013-01-12"
+  s.description = "A Ruby wrapper for Linux's inotify, using FFI"
+  s.email = "nex342@gmail.com"
   s.extra_rdoc_files = [
     "README.md"
   ]
@@ -29,13 +29,12 @@ Gem::Specification.new do |s|
     "lib/rb-inotify/watcher.rb",
     "rb-inotify.gemspec"
   ]
-  s.homepage = %q{http://github.com/nex3/rb-inotify}
+  s.homepage = "http://github.com/nex3/rb-inotify"
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
-  s.summary = %q{A Ruby wrapper for Linux's inotify, using FFI}
+  s.rubygems_version = "1.8.24"
+  s.summary = "A Ruby wrapper for Linux's inotify, using FFI"
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
