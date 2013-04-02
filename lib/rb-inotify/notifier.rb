@@ -270,11 +270,11 @@ module INotify
 
       events = []
       cookies = {}
-      while ev = Event.consume(data, self)
-        events << ev
-        next if ev.cookie == 0
-        cookies[ev.cookie] ||= []
-        cookies[ev.cookie] << ev
+      while event = Event.consume(data, self)
+        events << event
+        next if event.cookie == 0
+        cookies[event.cookie] ||= []
+        cookies[event.cookie] << event
       end
       cookies.each {|c, evs| evs.each {|ev| ev.related.replace(evs - [ev]).freeze}}
       events
