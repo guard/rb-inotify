@@ -113,7 +113,7 @@ module INotify
       @native = Native::Event.new(ptr)
       @related = []
       @cookie = @native[:cookie]
-      @name = data[@native.size, @native[:len]].gsub(/\0+$/, '')
+      @name = data[@native.size, @native[:len]].gsub(/\0+$/, '').force_encoding('filesystem')
       @notifier = notifier
       @watcher_id = @native[:wd]
 
