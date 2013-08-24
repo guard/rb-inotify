@@ -113,7 +113,7 @@ module INotify
       @native = Native::Event.new(ptr)
       @related = []
       @cookie = @native[:cookie]
-      @name = data[@native.size, @native[:len]].gsub(/\0+$/, '').force_encoding('filesystem')
+      @name = fix_encoding(data[@native.size, @native[:len]].gsub(/\0+$/, ''))
       @notifier = notifier
       @watcher_id = @native[:wd]
 
@@ -134,6 +134,13 @@ module INotify
     # @return [Fixnum]
     def size
       @native.size + @native[:len]
+    end
+
+    private
+
+    def fix_encoding(name)
+      name.force_encoding('filesystem') if name.respond_to?(:force_encoding)
+      name
     end
   end
 end
