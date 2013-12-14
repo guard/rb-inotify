@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "rb-inotify"
-  s.version = "0.9.2"
+  s.version = "0.9.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nathan Weizenbaum"]
-  s.date = "2013-09-12"
+  s.date = "2013-12-14"
   s.description = "A Ruby wrapper for Linux's inotify, using FFI"
   s.email = "nex342@gmail.com"
   s.extra_rdoc_files = [
@@ -33,7 +33,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.24"
   s.summary = "A Ruby wrapper for Linux's inotify, using FFI"
-  s.license = "MIT"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
