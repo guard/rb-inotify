@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "rb-inotify"
-  s.version = "0.9.3"
+  s.version = "0.9.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nathan Weizenbaum"]
-  s.date = "2013-12-14"
+  s.date = "2014-04-25"
   s.description = "A Ruby wrapper for Linux's inotify, using FFI"
   s.email = "nex342@gmail.com"
   s.extra_rdoc_files = [
@@ -31,11 +31,11 @@ Gem::Specification.new do |s|
   ]
   s.homepage = "http://github.com/nex3/rb-inotify"
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.24"
+  s.rubygems_version = "2.0.3"
   s.summary = "A Ruby wrapper for Linux's inotify, using FFI"
 
   if s.respond_to? :specification_version then
-    s.specification_version = 3
+    s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<ffi>, [">= 0.5.0"])
