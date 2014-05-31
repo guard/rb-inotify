@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.authors = ["Nathan Weizenbaum"]
   s.date = "2014-04-25"
   s.description = "A Ruby wrapper for Linux's inotify, using FFI"
+  s.licenses = ['MIT']
   s.email = "nex342@gmail.com"
   s.extra_rdoc_files = [
     "README.md"
