@@ -3,6 +3,7 @@ require 'rb-inotify/native/flags'
 require 'rb-inotify/notifier'
 require 'rb-inotify/watcher'
 require 'rb-inotify/event'
+require 'rb-inotify/errors'
 
 # The root module of the library, which is laid out as so:
 #
