@@ -65,6 +65,16 @@ module INotify
       # Event occurred against dir.
       IN_ISDIR = 0x40000000
 
+
+      ##  I/O multiplexing
+
+      # There is data to read.
+      POLLIN  = 1
+      # Writing now will not block.
+      POLLOUT = 2
+      # Error condition (output only).
+      POLLERR = 4
+
       # Converts a list of flags to the bitmask that the C API expects.
       #
       # @param flags [Array<Symbol>]
