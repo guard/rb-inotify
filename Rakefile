@@ -12,6 +12,9 @@ begin
     gem.authors = ["Nathan Weizenbaum"]
     gem.add_dependency "ffi", ">= 0.5.0"
     gem.add_development_dependency "yard", ">= 0.4.0"
+    gem.add_development_dependency "pry", "~> 0.10.0"
+    gem.add_development_dependency "rspec", "~> 3.1.0"
+    gem.add_development_dependency "countdownlatch", "~> 1.0.0"
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
