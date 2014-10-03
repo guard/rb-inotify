@@ -18,7 +18,8 @@ module INotify
         :wd, :int,
         :mask, :uint32,
         :cookie, :uint32,
-        :len, :uint32)
+        :len, :uint32,
+        :name, [:char, 0])
     end
 
     # The C struct describing a poll fd
@@ -30,6 +31,7 @@ module INotify
         :events,  :short,
         :revents, :short)
     end
+
 
     attach_function :inotify_init, [], :int
     attach_function :inotify_add_watch, [:int, :string, :uint32], :int
