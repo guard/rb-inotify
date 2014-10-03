@@ -271,7 +271,7 @@ module INotify
     #
     # {#run} or {#process} are ususally preferable to calling this directly.
     def read_events
-      size = 64 * Native::Event.size
+      size = Native::Event.size + Native.fpathconf(fd, Native::Flags::PC_NAME_MAX) + 1
       tries = 1
 
       begin

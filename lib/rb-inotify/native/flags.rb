@@ -65,6 +65,11 @@ module INotify
       # Event occurred against dir.
       IN_ISDIR = 0x40000000
 
+      ## fpathconf Macros
+
+      # returns the maximum length of a filename in the directory path or fd that the process is allowed to create.  The corresponding macro is _POSIX_NAME_MAX.
+      PC_NAME_MAX = 3
+
       # Converts a list of flags to the bitmask that the C API expects.
       #
       # @param flags [Array<Symbol>]
