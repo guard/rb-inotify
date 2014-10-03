@@ -27,6 +27,10 @@ module INotify
     # * Files in `/dev/fd` sometimes register as directories, but are not enumerable.
     RECURSIVE_BLACKLIST = %w[/dev/fd]
 
+    # The number of seconds before #slect_read times out when
+    # calling IO#select.  Also used when calling Native#poll.
+    SELECT_TIMEOUT = 1
+
     # A hash from {Watcher} ids to the instances themselves.
     #
     # @private
@@ -261,11 +265,12 @@ module INotify
     #
     # {#run} or {#process} are ususally preferable to calling this directly.
     def read_events
-      size = 64 * Native::Event.size
+      size = Native::Event.size + Native.fpathconf(fd, Native::Flags::PC_NAME_MAX) + 1
       tries = 1
 
       begin
-        data = readpartial(size)
+        data = select_read(size)
+        return [] if data.nil?
       rescue SystemCallError => er
         # EINVAL means that there's more data to be read
         # than will fit in the buffer size
@@ -289,10 +294,31 @@ module INotify
 
     private
 
-    # Same as IO#readpartial, or as close as we need.
-    def readpartial(size)
-      # Use Ruby's readpartial if possible, to avoid blocking other threads.
-      return to_io.readpartial(size) if self.class.supports_ruby_io?
+    # Performs a IO#select then IO#readpartial on the io stream.
+    # `SELECT_TIMEOUT` is passed as the timeout when calling select,
+    # upon expiration the `@stop` flag is checked.  If false IO#select is called
+    # again, else `nil` is returned.
+    def select_read(size)
+      if self.class.supports_ruby_io?
+        io = self.to_io if self.class.supports_ruby_io?
+        while !IO.select([io], [], [], SELECT_TIMEOUT) # Returns nil on timeout
+          return nil if @stop
+        end
+        return io.readpartial(size)
+      end
+
+      # if the ruby version does not support IO
+
+      pollfd = Native::PollFD.new.tap do |p|
+        p[:fd] = fd
+        p[:events] = Native::Flags::POLLIN
+        p[:revents] = 0
+      end
+      # Using Native#poll instead of Native#select as it was more 
+      # strait forward to map through ffi.
+      until Native.poll(pollfd, 1, (SELECT_TIMEOUT * 1000).to_i) >= 1
+        return nil if @stop
+      end
 
       tries = 0
       begin
