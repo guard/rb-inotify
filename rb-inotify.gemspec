@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
     "rb-inotify.gemspec"
   ]
   s.homepage = "http://github.com/nex3/rb-inotify"
+  s.license = "MIT"
   s.require_paths = ["lib"]
   s.rubygems_version = "2.0.3"
   s.summary = "A Ruby wrapper for Linux's inotify, using FFI"
