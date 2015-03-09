@@ -242,8 +242,8 @@ module INotify
     #
     # @raise [SystemCallError] if closing the underlying file descriptor fails.
     def close
+      @watchers.clear
       if Native.close(@fd) == 0
-        @watchers.clear
         return
       end
 
