@@ -29,8 +29,5 @@ module INotify
     attach_function :inotify_add_watch, [:int, :string, :uint32], :int
     attach_function :inotify_rm_watch, [:int, :uint32], :int
     attach_function :fpathconf, [:int, :int], :long
-
-    attach_function :read, [:int, :pointer, :size_t], :ssize_t
-    attach_function :close, [:int], :int
   end
 end
