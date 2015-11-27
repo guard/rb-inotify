@@ -38,7 +38,9 @@ module INotify
     # (except under JRuby -- see \{#to\_io}).
     #
     # @return [Fixnum]
-    attr_reader :fd
+    def fd
+      @handle.fileno
+    end
 
     # @return [Boolean] Whether or not this Ruby implementation supports
     #   wrapping the native file descriptor in a Ruby IO wrapper.
@@ -51,9 +53,17 @@ module INotify
     # @return [Notifier]
     # @raise [SystemCallError] if inotify failed to initialize for some reason
     def initialize
-      @fd = Native.inotify_init
+      fd = Native.inotify_init
       @watchers = {}
-      return unless @fd < 0
+      unless fd < 0
+        if self.class.supports_ruby_io?
+          @handle = IO.new(fd)
+        else
+          @handle = Native::Handle.new(fd)
+          ObjectSpace.define_finalizer(self, @handle.finalizer)
+        end
+        return
+      end
 
       raise SystemCallError.new(
         "Failed to initialize inotify" +
@@ -85,7 +95,7 @@ module INotify
       unless self.class.supports_ruby_io?
         raise NotImplementedError.new("INotify::Notifier#to_io is not supported under JRuby")
       end
-      @io ||= IO.new(@fd)
+      @handle
     end
 
     # Watches a file or directory for changes,
@@ -247,17 +257,8 @@ module INotify
     # @raise [SystemCallError] if closing the underlying file descriptor fails.
     def close
       stop
-      if Native.close(@fd) == 0
-        @watchers.clear
-        return
-      end
-
-      raise SystemCallError.new("Failed to properly close inotify socket" +
-       case FFI.errno
-       when Errno::EBADF::Errno; ": invalid or closed file descriptior"
-       when Errno::EIO::Errno; ": an I/O error occured"
-       end,
-       FFI.errno)
+      @handle.close
+      @watchers.clear
     end
 
     # Blocks until there are one or more filesystem events that this notifier
@@ -299,38 +300,11 @@ module INotify
 
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
-      # Use Ruby's readpartial if possible, to avoid blocking other threads.
-      begin
-        return to_io.readpartial(size) if self.class.supports_ruby_io?
-      rescue Errno::EBADF, IOError
-        # If the IO has already been closed, reading from it will cause
-        # Errno::EBADF. In JRuby it can raise IOError with invalid or
-        # closed file descriptor.
-        return nil
-      rescue IOError => ex
-        return nil if ex.message =~ /stream closed/
-        raise
-      end
-
-      tries = 0
-      begin
-        tries += 1
-        buffer = FFI::MemoryPointer.new(:char, size)
-        size_read = Native.read(fd, buffer, size)
-        return buffer.read_string(size_read) if size_read >= 0
-      end while FFI.errno == Errno::EINTR::Errno && tries <= 5
-
-      raise SystemCallError.new("Error reading inotify events" +
-        case FFI.errno
-        when Errno::EAGAIN::Errno; ": no data available for non-blocking I/O"
-        when Errno::EBADF::Errno; ": invalid or closed file descriptor"
-        when Errno::EFAULT::Errno; ": invalid buffer"
-        when Errno::EINVAL::Errno; ": invalid file descriptor"
-        when Errno::EIO::Errno; ": I/O error"
-        when Errno::EISDIR::Errno; ": file descriptor is a directory"
-        else; ""
-        end,
-        FFI.errno)
+      @handle.readpartial(size)
+    rescue Errno::EBADF
+      # If the IO has already been closed, reading from it will cause
+      # Errno::EBADF.
+      nil
     end
   end
 end
