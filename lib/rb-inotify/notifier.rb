@@ -38,16 +38,21 @@ module INotify
     # (except under JRuby -- see \{#to\_io}).
     #
     # @return [Fixnum]
-    attr_reader :fd
+    def fd
+      @handle.fileno
+    end
 
     # Creates a new {Notifier}.
     #
     # @return [Notifier]
     # @raise [SystemCallError] if inotify failed to initialize for some reason
     def initialize
-      @fd = Native.inotify_init
+      fd = Native.inotify_init
       @watchers = {}
-      return unless @fd < 0
+      unless fd < 0
+        @handle = IO.new(fd)
+        return
+      end
 
       raise SystemCallError.new(
         "Failed to initialize inotify" +
@@ -76,7 +81,7 @@ module INotify
     # @return [IO] An IO object wrapping the file descriptor
     # @raise [NotImplementedError] if this is being called in JRuby
     def to_io
-      @io ||= IO.new(@fd)
+      @handle
     end
 
     # Watches a file or directory for changes,
@@ -241,17 +246,8 @@ module INotify
     # @raise [SystemCallError] if closing the underlying file descriptor fails.
     def close
       stop
-      if Native.close(@fd) == 0
-        @watchers.clear
-        return
-      end
-
-      raise SystemCallError.new("Failed to properly close inotify socket" +
-       case FFI.errno
-       when Errno::EBADF::Errno; ": invalid or closed file descriptior"
-       when Errno::EIO::Errno; ": an I/O error occured"
-       end,
-       FFI.errno)
+      @handle.close
+      @watchers.clear
     end
 
     # Blocks until there are one or more filesystem events that this notifier
@@ -293,11 +289,10 @@ module INotify
 
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
-      to_io.readpartial(size)
-    rescue Errno::EBADF, IOError
+      @handle.readpartial(size)
+    rescue Errno::EBADF
       # If the IO has already been closed, reading from it will cause
-      # Errno::EBADF. In JRuby it can raise IOError with invalid or
-      # closed file descriptor.
+      # Errno::EBADF.
       nil
     end
   end
