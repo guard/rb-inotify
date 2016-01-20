@@ -275,6 +275,7 @@ module INotify
         tries += 1
         retry
       end
+      return [] if data.nil?
 
       events = []
       cookies = {}
@@ -296,7 +297,7 @@ module INotify
       begin
         return to_io.readpartial(size) if self.class.supports_ruby_io?
       rescue Errno::EBADF
-        return []
+        return nil
       end
 
       tries = 0
