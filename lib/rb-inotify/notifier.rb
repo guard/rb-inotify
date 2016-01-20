@@ -242,6 +242,7 @@ module INotify
     #
     # @raise [SystemCallError] if closing the underlying file descriptor fails.
     def close
+      stop
       if Native.close(@fd) == 0
         @watchers.clear
         return
@@ -292,7 +293,11 @@ module INotify
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
       # Use Ruby's readpartial if possible, to avoid blocking other threads.
-      return to_io.readpartial(size) if self.class.supports_ruby_io?
+      begin
+        return to_io.readpartial(size) if self.class.supports_ruby_io?
+      rescue Errno::EBADF
+        return []
+      end
 
       tries = 0
       begin
