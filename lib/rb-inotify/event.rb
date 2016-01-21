@@ -125,7 +125,7 @@ module INotify
     #
     # @private
     def callback!
-      watcher.callback!(self)
+      watcher.callback!(self) if watcher
     end
 
     # Returns the size of this event object in bytes,
