@@ -275,6 +275,7 @@ module INotify
         tries += 1
         retry
       end
+      # this will end up safely leaving from process method
       return [] if data.nil?
 
       events = []
@@ -295,7 +296,10 @@ module INotify
     def readpartial(size)
       # Use Ruby's readpartial if possible, to avoid blocking other threads.
       begin
+        # this will trigger Errno::EBADF when the file is closed
+        # this cannot be avoided even after Notifier::close is called
         return to_io.readpartial(size) if self.class.supports_ruby_io?
+      # to go out of this program without exception
       rescue Errno::EBADF
         return nil
       end
