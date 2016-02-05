@@ -242,6 +242,7 @@ module INotify
     #
     # @raise [SystemCallError] if closing the underlying file descriptor fails.
     def close
+      stop
       if Native.close(@fd) == 0
         @watchers.clear
         return
@@ -255,9 +256,11 @@ module INotify
        FFI.errno)
     end
 
-    # Blocks until there are one or more filesystem events
-    # that this notifier has watchers registered for.
-    # Once there are events, returns their {Event} objects.
+    # Blocks until there are one or more filesystem events that this notifier
+    # has watchers registered for. Once there are events, returns their {Event}
+    # objects.
+    #
+    # This can return an empty list if the watcher was closed elsewhere.
     #
     # {#run} or {#process} are ususally preferable to calling this directly.
     def read_events
@@ -274,6 +277,7 @@ module INotify
         tries += 1
         retry
       end
+      return [] if data.nil?
 
       events = []
       cookies = {}
@@ -292,7 +296,13 @@ module INotify
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
       # Use Ruby's readpartial if possible, to avoid blocking other threads.
-      return to_io.readpartial(size) if self.class.supports_ruby_io?
+      begin
+        return to_io.readpartial(size) if self.class.supports_ruby_io?
+      rescue Errno::EBADF
+        # If the IO has already been closed, reading from it will cause
+        # Errno::EBADF.
+        return nil
+      end
 
       tries = 0
       begin
