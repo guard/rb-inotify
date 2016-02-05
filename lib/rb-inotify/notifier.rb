@@ -256,9 +256,11 @@ module INotify
        FFI.errno)
     end
 
-    # Blocks until there are one or more filesystem events
-    # that this notifier has watchers registered for.
-    # Once there are events, returns their {Event} objects.
+    # Blocks until there are one or more filesystem events that this notifier
+    # has watchers registered for. Once there are events, returns their {Event}
+    # objects.
+    #
+    # This can return an empty list if the watcher was closed elsewhere.
     #
     # {#run} or {#process} are ususally preferable to calling this directly.
     def read_events
@@ -275,7 +277,6 @@ module INotify
         tries += 1
         retry
       end
-      # this will end up safely leaving from process method
       return [] if data.nil?
 
       events = []
@@ -296,11 +297,10 @@ module INotify
     def readpartial(size)
       # Use Ruby's readpartial if possible, to avoid blocking other threads.
       begin
-        # this will trigger Errno::EBADF when the file is closed
-        # this cannot be avoided even after Notifier::close is called
         return to_io.readpartial(size) if self.class.supports_ruby_io?
-      # to go out of this program without exception
       rescue Errno::EBADF
+        # If the IO has already been closed, reading from it will cause
+        # Errno::EBADF.
         return nil
       end
 
