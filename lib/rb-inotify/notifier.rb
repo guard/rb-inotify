@@ -272,7 +272,8 @@ module INotify
       rescue SystemCallError => er
         # EINVAL means that there's more data to be read
         # than will fit in the buffer size
-        raise er unless er.errno == Errno::EINVAL::Errno && tries < 5
+        return [] if er.errno == Errno::EBADF::Errno && self.class.supports_ruby_io?
+        raise er unless er.errno == Errno::EINVAL::Errno || tries == 5
         size *= 2
         tries += 1
         retry
