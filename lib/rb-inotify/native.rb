@@ -9,6 +9,10 @@ module INotify
   module Native
     extend FFI::Library
     ffi_lib FFI::Library::LIBC
+    begin
+      ffi_lib 'inotify'
+    rescue LoadError
+    end
 
     # The C struct describing an inotify event.
     #
