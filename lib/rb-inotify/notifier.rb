@@ -304,7 +304,8 @@ module INotify
         return to_io.readpartial(size) if self.class.supports_ruby_io?
       rescue Errno::EBADF, IOError
         # If the IO has already been closed, reading from it will cause
-        # Errno::EBADF.
+        # Errno::EBADF. In JRuby it can raise IOError with invalid or
+        # closed file descriptor.
         return nil
       rescue IOError => ex
         return nil if ex.message =~ /stream closed/
