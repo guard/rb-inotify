@@ -298,9 +298,10 @@ module INotify
       # Use Ruby's readpartial if possible, to avoid blocking other threads.
       begin
         return to_io.readpartial(size) if self.class.supports_ruby_io?
-      rescue Errno::EBADF
+      rescue Errno::EBADF, IOError
         # If the IO has already been closed, reading from it will cause
-        # Errno::EBADF.
+        # Errno::EBADF. In JRuby it can raise IOError with invalid or
+        # closed file descriptor.
         return nil
       end
 
