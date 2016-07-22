@@ -235,7 +235,10 @@ module INotify
     #
     # @see #run
     def process
-      read_events.each {|event| event.callback!}
+      read_events.each do |event|
+        event.callback!
+        event.flags.include?(:ignored) && event.notifier.watchers.delete(event.watcher_id)
+      end
     end
 
     # Close the notifier.
@@ -282,7 +285,6 @@ module INotify
       events = []
       cookies = {}
       while event = Event.consume(data, self)
-        event.flags.include?(:ignored) && event.notifier.watchers.delete(event.watcher_id)
         events << event
         next if event.cookie == 0
         cookies[event.cookie] ||= []
