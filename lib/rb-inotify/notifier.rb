@@ -116,6 +116,12 @@ module INotify
     # `:open`
     # : A file is opened.
     #
+    # `:delete_self`
+    # : The watched file or directory itself is deleted.
+    #
+    # `:move_self`
+    # : The watched file or directory itself is moved.
+    #
     # ### Directory-Specific Flags
     #
     # These flags only apply when a directory is being watched.
@@ -131,12 +137,6 @@ module INotify
     #
     # `:delete`
     # : A file is deleted in the watched directory.
-    #
-    # `:delete_self`
-    # : The watched file or directory itself is deleted.
-    #
-    # `:move_self`
-    # : The watched file or directory itself is moved.
     #
     # ### Helper Flags
     #
