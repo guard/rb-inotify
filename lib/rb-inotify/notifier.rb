@@ -116,12 +116,6 @@ module INotify
     # `:open`
     # : A file is opened.
     #
-    # `:delete_self`
-    # : The watched file or directory itself is deleted.
-    #
-    # `:move_self`
-    # : The watched file or directory itself is moved.
-    #
     # ### Directory-Specific Flags
     #
     # These flags only apply when a directory is being watched.
@@ -137,6 +131,12 @@ module INotify
     #
     # `:delete`
     # : A file is deleted in the watched directory.
+    #
+    # `:delete_self`
+    # : The watched file or directory itself is deleted.
+    #
+    # `:move_self`
+    # : The watched file or directory itself is moved.
     #
     # ### Helper Flags
     #
@@ -282,6 +282,7 @@ module INotify
       events = []
       cookies = {}
       while event = Event.consume(data, self)
+        event.flags.include?(:ignored) && event.notifier.watchers.delete(event.watcher_id)
         events << event
         next if event.cookie == 0
         cookies[event.cookie] ||= []
