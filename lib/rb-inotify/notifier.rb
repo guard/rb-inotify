@@ -302,6 +302,9 @@ module INotify
         # If the IO has already been closed, reading from it will cause
         # Errno::EBADF.
         return nil
+      rescue IOError => ex
+        return nil if ex.message =~ /stream closed/
+        raise
       end
 
       tries = 0
