@@ -195,7 +195,11 @@ module INotify
         d = File.join(path, base)
         binary_d = d.respond_to?(:force_encoding) ? d.dup.force_encoding('BINARY') : d
         next if binary_d =~ /\/\.\.?$/ # Current or parent directory
-        watch(d, *flags, &callback) if !RECURSIVE_BLACKLIST.include?(d) && File.directory?(d)
+        next if RECURSIVE_BLACKLIST.include?(d)
+        next if flags.include?(:dont_follow) && File.symlink?(d)
+        next if !File.directory?(d)
+
+        watch(d, *flags, &callback)
       end
 
       dir.close
