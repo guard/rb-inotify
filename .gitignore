@@ -1,3 +1,5 @@
+/.bundle
 /.yardoc
+/Gemfile.lock
 /doc
 /pkg

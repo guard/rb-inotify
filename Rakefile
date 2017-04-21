@@ -12,6 +12,7 @@ begin
     gem.authors = ["Nathan Weizenbaum"]
     gem.add_dependency "ffi", ">= 0.5.0"
     gem.add_development_dependency "yard", ">= 0.4.0"
+    gem.add_development_dependency "rspec", "~> 3.6.0"
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
@@ -52,3 +53,10 @@ rescue LoadError
     abort "YARD is not available. In order to run yardoc, you must: sudo gem install yard"
   end
 end
+
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new do |t|
+  t.ruby_opts = '-w'
+end
+
+task :default => [:spec]
