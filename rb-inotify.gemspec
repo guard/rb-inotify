@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Nathan Weizenbaum"]
+  s.license = "MIT"
   s.date = "2017-01-26"
   s.description = "A Ruby wrapper for Linux's inotify, using FFI"
   s.email = "nex342@gmail.com"
