@@ -249,6 +249,8 @@ module INotify
       stop
       if Native.close(@fd) == 0
         @watchers.clear
+        # Run GC to make sure file descriptor is freed
+        GC.start
         return
       end
 
