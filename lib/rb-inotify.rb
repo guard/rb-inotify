@@ -1,3 +1,4 @@
+require 'rb-inotify/version'
 require 'rb-inotify/native'
 require 'rb-inotify/native/flags'
 require 'rb-inotify/notifier'
@@ -11,8 +12,4 @@ require 'rb-inotify/errors'
 # * {Watcher} -- A watcher for a single file or directory
 # * {Event} -- An filesystem event notification
 module INotify
-  # An array containing the version number of rb-inotify.
-  # The numbers in the array are the major, minor, and patch versions,
-  # respectively.
-  VERSION = [0, 9, 8]
 end
