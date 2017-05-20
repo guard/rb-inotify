@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary     = 'A Ruby wrapper for Linux inotify, using FFI'
   spec.authors     = ['Natalie Weizenbaum', 'Samuel Williams']
   spec.email       = ['nex342@gmail.com', 'samuel.williams@oriontransfer.co.nz']
-  spec.homepage    = 'https://github.com/ioquatix/rb-inotify'
+  spec.homepage    = 'https://github.com/guard/rb-inotify'
   spec.licenses    = ['MIT']
 
   spec.files         = `git ls-files`.split($/)
