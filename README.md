@@ -6,9 +6,9 @@ It uses the [FFI](http://wiki.github.com/ffi/ffi) gem to avoid having to compile
 
 [API documentation is available on rdoc.info](http://rdoc.info/projects/nex3/rb-inotify).
 
-[![Build Status](https://secure.travis-ci.org/ioquatix/rb-inotify.svg)](http://travis-ci.org/ioquatix/rb-inotify)
-[![Code Climate](https://codeclimate.com/github/ioquatix/rb-inotify.svg)](https://codeclimate.com/github/ioquatix/rb-inotify)
-[![Coverage Status](https://coveralls.io/repos/ioquatix/rb-inotify/badge.svg)](https://coveralls.io/r/ioquatix/rb-inotify)
+[![Build Status](https://secure.travis-ci.org/guard/rb-inotify.svg)](http://travis-ci.org/guard/rb-inotify)
+[![Code Climate](https://codeclimate.com/github/guard/rb-inotify.svg)](https://codeclimate.com/github/guard/rb-inotify)
+[![Coverage Status](https://coveralls.io/repos/guard/rb-inotify/badge.svg)](https://coveralls.io/r/guard/rb-inotify)
 
 ## Basic Usage
 
