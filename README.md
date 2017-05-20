@@ -6,6 +6,10 @@ It uses the [FFI](http://wiki.github.com/ffi/ffi) gem to avoid having to compile
 
 [API documentation is available on rdoc.info](http://rdoc.info/projects/nex3/rb-inotify).
 
+[![Build Status](https://secure.travis-ci.org/ioquatix/rb-inotify.svg)](http://travis-ci.org/ioquatix/rb-inotify)
+[![Code Climate](https://codeclimate.com/github/ioquatix/rb-inotify.svg)](https://codeclimate.com/github/ioquatix/rb-inotify)
+[![Coverage Status](https://coveralls.io/repos/ioquatix/rb-inotify/badge.svg)](https://coveralls.io/r/ioquatix/rb-inotify)
+
 ## Basic Usage
 
 The API is similar to the inotify C API, but with a more Rubyish feel.
