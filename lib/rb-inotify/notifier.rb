@@ -287,6 +287,7 @@ module INotify
       events = []
       cookies = {}
       while event = Event.consume(data, self)
+        event.flags.include?(:ignored) && event.notifier.watchers.delete(event.watcher_id)
         events << event
         next if event.cookie == 0
         cookies[event.cookie] ||= []
