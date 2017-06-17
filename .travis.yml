@@ -1,6 +1,5 @@
 language: ruby
 sudo: false
-dist: trusty
 cache: bundler
 rvm:
   - 2.0
@@ -12,8 +11,10 @@ rvm:
   - ruby-head
   - jruby-9.1.8.0
   - jruby-head
-  - rbx-3
 matrix:
+  include:
+    - rvm: rbx-3
+      dist: trusty
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-head
