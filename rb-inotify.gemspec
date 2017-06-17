@@ -23,7 +23,8 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'ffi', '>= 0.5.0', '< 2'
 
-  spec.add_development_dependency "rspec", "~> 3.4.0"
+  spec.add_development_dependency "rspec", "~> 3.4"
   spec.add_development_dependency "bundler", "~> 1.3"
-  spec.add_development_dependency "rake"
+  # rake 11.x requires Ruby >= 1.9.3
+  spec.add_development_dependency "rake", ">= 10.5.0", "< 13"
 end
