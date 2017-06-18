@@ -19,3 +19,11 @@ matrix:
     - rvm: jruby-head
     - rvm: rbx-3
   fast_finish: true
+script:
+  # Unit test
+  - bundle exec rake
+  # Install test
+  - gem build rb-inotify.gemspec
+  - gem install rb-inotify-*.gem
+  - "gem list | grep rb-inotify"
+  - ruby -e 'require "rb-inotify"'
