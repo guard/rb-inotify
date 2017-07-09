@@ -27,3 +27,9 @@ script:
   - gem install rb-inotify-*.gem
   - "gem list | grep rb-inotify"
   - ruby -e 'require "rb-inotify"'
+  # Integration test
+  - git clone https://github.com/matthewd/guard -b inotify-test-target --depth 1
+  - cd guard
+  - export BUNDLE_GEMFILE=$PWD/Gemfile
+  - bundle install --without development
+  - bundle exec rake
