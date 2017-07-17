@@ -154,4 +154,25 @@ describe INotify::Notifier do
       events
     end
   end
+
+  describe "mixed instances" do
+    it "doesn't tangle fds" do
+      notifiers = Array.new(30) { INotify::Notifier.new }
+      notifiers.each(&:to_io)
+
+      one = Array.new(10) { IO.pipe.last }
+      notifiers.each(&:close)
+
+      two = Array.new(10) { IO.pipe.last }
+
+      notifiers = nil
+      GC.start
+
+      _, writable, _ = select(nil, one, nil, 1)
+      expect(writable).to match_array(one)
+
+      _, writable, _ = select(nil, two, nil, 1)
+      expect(writable).to match_array(two)
+    end
+  end
 end
