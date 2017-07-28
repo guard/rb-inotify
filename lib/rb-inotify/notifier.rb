@@ -1,3 +1,5 @@
+require 'thread'
+
 module INotify
   # Notifier wraps a single instance of inotify.
   # It's possible to have more than one instance,
@@ -47,8 +49,12 @@ module INotify
     # @return [Notifier]
     # @raise [SystemCallError] if inotify failed to initialize for some reason
     def initialize
-      fd = Native.inotify_init
+      @running = Mutex.new
+      @pipe = IO.pipe
+
       @watchers = {}
+
+      fd = Native.inotify_init
       unless fd < 0
         @handle = IO.new(fd)
         return
@@ -217,8 +223,11 @@ module INotify
     #
     # @see #process
     def run
-      @stop = false
-      process until @stop
+      @running.synchronize do
+        @stop = false
+
+        process until @stop
+      end
     end
 
     # Stop watching for filesystem events.
@@ -226,6 +235,11 @@ module INotify
     # exit out as soon as we finish handling the events.
     def stop
       @stop = true
+      @pipe.last.write "."
+
+      @running.synchronize do
+        # no-op: we just needed to wait until the lock was available
+      end
     end
 
     # Blocks until there are one or more filesystem events
@@ -289,6 +303,8 @@ module INotify
 
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
+      readable, = select([@handle, @pipe.first])
+      return nil if readable.include?(@pipe.first)
       @handle.readpartial(size)
     rescue Errno::EBADF
       # If the IO has already been closed, reading from it will cause
