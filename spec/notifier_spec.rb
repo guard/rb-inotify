@@ -111,48 +111,34 @@ describe INotify::Notifier do
       end
     end
 
-    if INotify::Notifier.supports_ruby_io?
-      describe :fd do
-        it "returns an integer" do
-          expect(@notifier.fd).to be_an(Integer)
-        end
+    describe :fd do
+      it "returns an integer" do
+        expect(@notifier.fd).to be_an(Integer)
+      end
+    end
+
+    describe :to_io do
+      it "returns a ruby IO" do
+        expect(@notifier.to_io).to be_an(::IO)
       end
 
-      describe :to_io do
-        it "returns a ruby IO" do
-          expect(@notifier.to_io).to be_an(::IO)
-        end
-
-        it "matches the fd" do
-          expect(@notifier.to_io.fileno).to eq(@notifier.fd)
-        end
-
-        it "caches its result" do
-          expect(@notifier.to_io).to be(@notifier.to_io)
-        end
-
-        it "is selectable" do
-          events = recording(dir, :create)
-          expect(select([@notifier.to_io], nil, nil, 0.2)).to be_nil
-
-          dir.join("test.txt").write("hello world")
-          expect(select([@notifier.to_io], nil, nil, 0.2)).to eq([[@notifier.to_io], [], []])
-
-          @notifier.process
-          expect(select([@notifier.to_io], nil, nil, 0.2)).to be_nil
-        end
-      end
-    else
-      describe :fd do
-        it "returns an integer" do
-          expect(@notifier.fd).to be_an(Integer)
-        end
+      it "matches the fd" do
+        expect(@notifier.to_io.fileno).to eq(@notifier.fd)
       end
 
-      describe :to_io do
-        it "raises" do
-          expect { @notifier.to_io }.to raise_exception(NotImplementedError)
-        end
+      it "caches its result" do
+        expect(@notifier.to_io).to be(@notifier.to_io)
+      end
+
+      it "is selectable" do
+        events = recording(dir, :create)
+        expect(select([@notifier.to_io], nil, nil, 0.2)).to be_nil
+
+        dir.join("test.txt").write("hello world")
+        expect(select([@notifier.to_io], nil, nil, 0.2)).to eq([[@notifier.to_io], [], []])
+
+        @notifier.process
+        expect(select([@notifier.to_io], nil, nil, 0.2)).to be_nil
       end
     end
 

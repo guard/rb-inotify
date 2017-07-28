@@ -40,12 +40,6 @@ module INotify
     # @return [Fixnum]
     attr_reader :fd
 
-    # @return [Boolean] Whether or not this Ruby implementation supports
-    #   wrapping the native file descriptor in a Ruby IO wrapper.
-    def self.supports_ruby_io?
-      RUBY_PLATFORM !~ /java/
-    end
-
     # Creates a new {Notifier}.
     #
     # @return [Notifier]
@@ -82,9 +76,6 @@ module INotify
     # @return [IO] An IO object wrapping the file descriptor
     # @raise [NotImplementedError] if this is being called in JRuby
     def to_io
-      unless self.class.supports_ruby_io?
-        raise NotImplementedError.new("INotify::Notifier#to_io is not supported under JRuby")
-      end
       @io ||= IO.new(@fd)
     end
 
@@ -302,38 +293,12 @@ module INotify
 
     # Same as IO#readpartial, or as close as we need.
     def readpartial(size)
-      # Use Ruby's readpartial if possible, to avoid blocking other threads.
-      begin
-        return to_io.readpartial(size) if self.class.supports_ruby_io?
-      rescue Errno::EBADF, IOError
-        # If the IO has already been closed, reading from it will cause
-        # Errno::EBADF. In JRuby it can raise IOError with invalid or
-        # closed file descriptor.
-        return nil
-      rescue IOError => ex
-        return nil if ex.message =~ /stream closed/
-        raise
-      end
-
-      tries = 0
-      begin
-        tries += 1
-        buffer = FFI::MemoryPointer.new(:char, size)
-        size_read = Native.read(fd, buffer, size)
-        return buffer.read_string(size_read) if size_read >= 0
-      end while FFI.errno == Errno::EINTR::Errno && tries <= 5
-
-      raise SystemCallError.new("Error reading inotify events" +
-        case FFI.errno
-        when Errno::EAGAIN::Errno; ": no data available for non-blocking I/O"
-        when Errno::EBADF::Errno; ": invalid or closed file descriptor"
-        when Errno::EFAULT::Errno; ": invalid buffer"
-        when Errno::EINVAL::Errno; ": invalid file descriptor"
-        when Errno::EIO::Errno; ": I/O error"
-        when Errno::EISDIR::Errno; ": file descriptor is a directory"
-        else; ""
-        end,
-        FFI.errno)
+      to_io.readpartial(size)
+    rescue Errno::EBADF, IOError
+      # If the IO has already been closed, reading from it will cause
+      # Errno::EBADF. In JRuby it can raise IOError with invalid or
+      # closed file descriptor.
+      nil
     end
   end
 end
