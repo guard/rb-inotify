@@ -92,7 +92,6 @@ describe INotify::Notifier do
         expect(events.map(&:name)).to match_array(%w(one.txt two.txt))
 
         @notifier.stop
-        sleep 0.5
 
         dir.join("three.txt").write("hello world")
         barriers.shift.wait(1)
@@ -100,14 +99,7 @@ describe INotify::Notifier do
         dir.join("four.txt").write("hello world")
         run_thread.join
 
-        expect(events.map(&:name)).not_to include("four.txt")
-
-        if RUBY_PLATFORM != "java"
-          # TODO: MRI doesn't actually stop until after it receives the
-          # next event *after* #stop is called, so 'three' is here. Java
-          # is less consistent.
-          expect(events.map(&:name)).to match_array(%w(one.txt two.txt three.txt))
-        end
+        expect(events.map(&:name)).to match_array(%w(one.txt two.txt))
       end
     end
 
