@@ -17,3 +17,5 @@ test/version_tmp
 tmp
 .tags*
 .rspec_status
+/guard/
+/listen/
