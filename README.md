@@ -81,7 +81,7 @@ so we can't use the notifier's file descriptor as a stand-in.
 
 Released under the MIT license.
 
-Copyright, 2009, by Nathan Weizenbaum.  
+Copyright, 2009, by [Natalie Weizenbaum](https://github.com/nex3).
 Copyright, 2017, by [Samuel G. D. Williams](http://www.codeotaku.com/samuel-williams).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
