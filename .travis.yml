@@ -1,23 +1,27 @@
 language: ruby
-sudo: false
-dist: trusty
 cache: bundler
+
 rvm:
   - 2.2
   - 2.3
   - 2.4
   - 2.5
+  - 2.6
+  - truffleruby
   - jruby-head
   - ruby-head
   - jruby-9.1.8.0
   - jruby-head
   - rbx-3
+
 matrix:
   allow_failures:
+    - rvm: truffleruby
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3
   fast_finish: true
+
 script:
   # Unit test
   - bundle exec rake
