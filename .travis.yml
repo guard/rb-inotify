@@ -1,44 +1,21 @@
 language: ruby
 cache: bundler
 
-rvm:
-  - 2.2
-  - 2.3
-  - 2.4
-  - 2.5
-  - 2.6
-  - jruby
-  - truffleruby
-  - jruby-head
-  - ruby-head
-  - rbx-3
-
 matrix:
+  include:
+    - rvm: 2.3
+    - rvm: 2.4
+    - rvm: 2.5
+    - rvm: 2.6
+    - rvm: jruby
+    - rvm: truffleruby
+    - rvm: jruby-head
+    - rvm: ruby-head
+    - rvm: rbx-3
   allow_failures:
     - rvm: truffleruby
+    - rvm: jruby
     - rvm: ruby-head
     - rvm: jruby-head
     - rvm: rbx-3
   fast_finish: true
-
-script:
-  # Unit test
-  - bundle exec rake
-  # Install test
-  - gem build rb-inotify.gemspec
-  - gem install rb-inotify-*.gem
-  - "gem list | grep rb-inotify"
-  - ruby -e 'require "rb-inotify"'
-  # Integration test: guard
-  - git clone https://github.com/guard/guard.git --depth 1
-  - cd guard
-  - export BUNDLE_GEMFILE=$PWD/Gemfile
-  - bundle install
-  - bundle exec rake
-  - cd ..
-  # Integration test: listen
-  - git clone https://github.com/guard/listen.git --depth 1
-  - cd listen
-  - export BUNDLE_GEMFILE=$PWD/Gemfile
-  - bundle install
-  - bundle exec rake
