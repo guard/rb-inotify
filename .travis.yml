@@ -10,7 +10,7 @@ rvm:
   - truffleruby
   - jruby-head
   - ruby-head
-  - jruby-9.1.8.0
+  - jruby
   - jruby-head
   - rbx-3
 
