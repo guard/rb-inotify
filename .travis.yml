@@ -7,11 +7,10 @@ rvm:
   - 2.4
   - 2.5
   - 2.6
+  - jruby
   - truffleruby
   - jruby-head
   - ruby-head
-  - jruby
-  - jruby-head
   - rbx-3
 
 matrix:
