@@ -51,12 +51,16 @@ module INotify
     def initialize
       @running = Mutex.new
       @pipe = IO.pipe
+      # JRuby shutdown sometimes runs IO finalizers before all threads finish.
+      @pipe[0].autoclose = false
+      @pipe[1].autoclose = false
 
       @watchers = {}
 
       fd = Native.inotify_init
       unless fd < 0
         @handle = IO.new(fd)
+        @handle.autoclose = false
         return
       end
 
