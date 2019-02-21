@@ -101,6 +101,16 @@ describe INotify::Notifier do
 
         expect(events.map(&:name)).to match_array(%w(one.txt two.txt))
       end
+
+      it "can be stopped from within a callback" do
+        barriers = Array.new(3) { Concurrent::Event.new }
+        barrier_queue = barriers.dup
+        events = recording(dir, :create) { @notifier.stop }
+
+        run_thread = Thread.new { @notifier.run }
+        dir.join("one.txt").write("hello world")
+        run_thread.join
+      end
     end
 
     describe :fd do

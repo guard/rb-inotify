@@ -224,10 +224,13 @@ module INotify
     # @see #process
     def run
       @running.synchronize do
+        Thread.current[:INOTIFY_RUN_THREAD] = true
         @stop = false
 
         process until @stop
       end
+    ensure
+      Thread.current[:INOTIFY_RUN_THREAD] = false
     end
 
     # Stop watching for filesystem events.
@@ -237,8 +240,10 @@ module INotify
       @stop = true
       @pipe.last.write "."
 
-      @running.synchronize do
-        # no-op: we just needed to wait until the lock was available
+      unless Thread.current[:INOTIFY_RUN_THREAD]
+        @running.synchronize do
+          # no-op: we just needed to wait until the lock was available
+        end
       end
     end
 
