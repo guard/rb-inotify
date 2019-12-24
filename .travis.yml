@@ -11,11 +11,9 @@ matrix:
     - rvm: truffleruby
     - rvm: jruby-head
     - rvm: ruby-head
-    - rvm: rbx-3
   allow_failures:
     - rvm: truffleruby
     - rvm: jruby
     - rvm: ruby-head
     - rvm: jruby-head
-    - rvm: rbx-3
   fast_finish: true
