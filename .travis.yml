@@ -7,6 +7,7 @@ matrix:
     - rvm: 2.4
     - rvm: 2.5
     - rvm: 2.6
+    - rvm: 2.7
     - rvm: jruby
     - rvm: truffleruby
     - rvm: jruby-head
