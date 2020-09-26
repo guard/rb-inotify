@@ -111,6 +111,20 @@ describe INotify::Notifier do
         dir.join("one.txt").write("hello world")
         run_thread.join
       end
+
+      it "can be stopped before it starts processing" do
+        barrier = Concurrent::Event.new
+
+        run_thread = Thread.new do
+          barrier.wait
+          @notifier.run
+        end
+
+        @notifier.stop
+        barrier.set
+
+        run_thread.join(1) or raise "timeout"
+      end
     end
 
     describe :fd do

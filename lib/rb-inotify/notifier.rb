@@ -50,6 +50,7 @@ module INotify
     # @raise [SystemCallError] if inotify failed to initialize for some reason
     def initialize
       @running = Mutex.new
+      @stop = false
       @pipe = IO.pipe
       # JRuby shutdown sometimes runs IO finalizers before all threads finish.
       if RUBY_ENGINE == 'jruby'
@@ -231,12 +232,12 @@ module INotify
     def run
       @running.synchronize do
         Thread.current[:INOTIFY_RUN_THREAD] = true
-        @stop = false
 
         process until @stop
       end
     ensure
       Thread.current[:INOTIFY_RUN_THREAD] = false
+      @stop = false
     end
 
     # Stop watching for filesystem events.
