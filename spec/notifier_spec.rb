@@ -94,22 +94,18 @@ describe INotify::Notifier do
         @notifier.stop
 
         dir.join("three.txt").write("hello world")
-        barriers.shift.wait(1)
-
-        dir.join("four.txt").write("hello world")
-        run_thread.join
+        run_thread.join(1) or raise "timeout"
 
         expect(events.map(&:name)).to match_array(%w(one.txt two.txt))
       end
 
       it "can be stopped from within a callback" do
-        barriers = Array.new(3) { Concurrent::Event.new }
-        barrier_queue = barriers.dup
-        events = recording(dir, :create) { @notifier.stop }
+        recording(dir, :create) { @notifier.stop }
 
         run_thread = Thread.new { @notifier.run }
+
         dir.join("one.txt").write("hello world")
-        run_thread.join
+        run_thread.join(1) or raise "timeout"
       end
     end
 
