@@ -71,6 +71,16 @@ describe INotify::Notifier do
         expect(bar_events.first.name).to eq("test_two.txt")
         expect(bar_events.first.absolute_name).to eq(another_dir.join("test_two.txt").to_s)
       end
+
+      it "file should not specified with :moved_from or :moved_to" do
+        dir.join("one.txt").write("hello world")
+        expect {
+          recording(dir.join("one.txt"), :moved_to)
+        }.to raise_error(ArgumentError)
+        expect {
+          recording(dir.join("one.txt"), :moved_from)
+        }.to raise_error(ArgumentError)
+      end
     end
 
     describe :run do
