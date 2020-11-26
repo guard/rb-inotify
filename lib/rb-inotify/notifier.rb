@@ -195,7 +195,12 @@ module INotify
     # @raise [SystemCallError] if the file or directory can't be watched,
     #   e.g. if the file isn't found, read access is denied,
     #   or the flags don't contain any events
+    # @raise [ArgumentError] if the file is specified with :move_to.
     def watch(path, *flags, &callback)
+      if File.file?(path) and (flags.include?(:moved_to) or flags.include?(:moved_from))
+        raise ArgumentError.new, ":moved_to must not be specified with file #{path}"
+      end
+
       return Watcher.new(self, path, *flags, &callback) unless flags.include?(:recursive)
 
       dir = Dir.new(path)
