@@ -12,9 +12,33 @@ matrix:
     - rvm: truffleruby
     - rvm: jruby-head
     - rvm: ruby-head
+# ppc64le support code
+    - rvm: 2.3
+      arch: ppc64le
+    - rvm: 2.4
+      arch: ppc64le
+    - rvm: 2.5
+      arch: ppc64le
+    - rvm: 2.6
+      arch: ppc64le
+    - rvm: 2.7
+      arch: ppc64le
+    - rvm: jruby
+      arch: ppc64le
+    - rvm: jruby-head
+      arch: ppc64le
+    - rvm: ruby-head
+      arch: ppc64le
   allow_failures:
     - rvm: truffleruby
     - rvm: jruby
     - rvm: ruby-head
     - rvm: jruby-head
+    - rvm: jruby
+      arch: ppc64le
+    - rvm: ruby-head
+      arch: ppc64le
+    - rvm: jruby-head
+      arch: ppc64le
+ 
   fast_finish: true
